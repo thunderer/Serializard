@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<user>
+  <id>1</id>
+  <name>Thomas</name>
+  <tag>
+    <id>100</id>
+    <name>various</name>
+  </tag>
+  <tags>
+    <tag>
+      <id>10</id>
+      <name>sth</name>
+    </tag>
+    <tag>
+      <id>11</id>
+      <name>xyz</name>
+    </tag>
+    <tag>
+      <id>12</id>
+      <name>rnd</name>
+    </tag>
+  </tags>
+</user>

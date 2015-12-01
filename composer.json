@@ -1,0 +1,26 @@
+{
+    "name": "thunderer/serializard",
+    "description": "Flexible serializer",
+    "keywords": ["serializer"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tomasz Kowalczyk",
+            "email": "tomasz@kowalczyk.cc"
+        }
+    ],
+    "require": {
+        "php": ">=5.3",
+        "symfony/yaml": "~2.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "@stable",
+        "thunderer/clausure": "@dev"
+    },
+    "autoload": {
+        "psr-4": {
+            "Thunder\\Serializard\\": "src/",
+            "Thunder\\Serializard\\Tests\\": "tests/"
+        }
+    }
+}
