@@ -4,7 +4,7 @@ namespace Thunder\Serializard\HandlerContainer;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class HandlerContainer implements  HandlerContainerInterface
+final class HandlerContainer implements HandlerContainerInterface
 {
     private $handlers = array();
     private $aliases = array();

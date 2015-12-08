@@ -12,7 +12,7 @@ final class Serializard
 {
     private $normalizers;
     private $hydrators;
-    /** @var FormatInterface[] */
+    /** @var Formats */
     private $formats;
 
     public function __construct(Formats $formats, Handlers $normalizers, Handlers $hydrators)
