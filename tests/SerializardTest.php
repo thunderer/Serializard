@@ -41,10 +41,12 @@ class SerializardTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(file_get_contents($file.'.xml'), $xml);
         $this->assertSame(require($file.'.php'), $array);
 
-        $this->assertSame($json, $serializard->serialize($serializard->unserialize($json, FakeUser::class, 'json'), 'json'));
-        $this->assertSame($yaml, $serializard->serialize($serializard->unserialize($yaml, FakeUser::class, 'yaml'), 'yaml'));
-        $this->assertSame($xml, $serializard->serialize($serializard->unserialize($xml, FakeUser::class, 'xml'), 'xml'));
-        $this->assertSame($array, $serializard->serialize($serializard->unserialize($array, FakeUser::class, 'array'), 'array'));
+        $userClass = 'Thunder\Serializard\Tests\Fake\FakeUser';
+
+        $this->assertSame($json, $serializard->serialize($serializard->unserialize($json, $userClass, 'json'), 'json'));
+        $this->assertSame($yaml, $serializard->serialize($serializard->unserialize($yaml, $userClass, 'yaml'), 'yaml'));
+        $this->assertSame($xml, $serializard->serialize($serializard->unserialize($xml, $userClass, 'xml'), 'xml'));
+        $this->assertSame($array, $serializard->serialize($serializard->unserialize($array, $userClass, 'array'), 'array'));
     }
 
     public function provideExamples()
@@ -63,8 +65,11 @@ class SerializardTest extends \PHPUnit_Framework_TestCase
 
     private function getSerializard()
     {
+        $userClass = 'Thunder\Serializard\Tests\Fake\FakeUser';
+        $tagClass = 'Thunder\Serializard\Tests\Fake\FakeTag';
+
         $normalizers = new HandlerContainer();
-        $normalizers->add(FakeUser::class, 'user', function(FakeUser $user) {
+        $normalizers->add($userClass, 'user', function(FakeUser $user) {
             return array(
                 'id' => $user->getId(),
                 'name' => $user->getName(),
@@ -72,7 +77,7 @@ class SerializardTest extends \PHPUnit_Framework_TestCase
                 'tags' => $user->getTags(),
             );
         });
-        $normalizers->add(FakeTag::class, 'tag', function(FakeTag $tag) {
+        $normalizers->add($tagClass, 'tag', function(FakeTag $tag) {
             return array(
                 'id' => $tag->getId(),
                 'name' => $tag->getName(),
@@ -80,8 +85,8 @@ class SerializardTest extends \PHPUnit_Framework_TestCase
         });
 
         $hydrators = new HandlerContainer();
-        $hydrators->add(FakeUser::class, 'user', function(array $data, Handlers $handlers) {
-            $tagHandler = $handlers->getHandler(FakeTag::class);
+        $hydrators->add($userClass, 'user', function(array $data, Handlers $handlers) use($tagClass) {
+            $tagHandler = $handlers->getHandler($tagClass);
 
             $user = new FakeUser($data['id'], $data['name'], $tagHandler($data['tag'], $handlers));
             foreach($data['tags'] as $tag) {
@@ -90,7 +95,7 @@ class SerializardTest extends \PHPUnit_Framework_TestCase
 
             return $user;
         });
-        $hydrators->add(FakeTag::class, 'tag', function(array $data, Handlers $handlers) {
+        $hydrators->add($tagClass, 'tag', function(array $data, Handlers $handlers) {
             return new FakeTag($data['id'], $data['name']);
         });
 
@@ -101,5 +106,23 @@ class SerializardTest extends \PHPUnit_Framework_TestCase
         $formats->add('array', new ArrayFormat());
 
         return new Serializard($formats, $normalizers, $hydrators);
+    }
+
+    public function testInvalidSerializationFormat()
+    {
+        $this->setExpectedException('RuntimeException');
+        $this->getSerializard()->serialize(new \stdClass(), 'invalid');
+    }
+
+    public function testInvalidUnserializationFormat()
+    {
+        $this->setExpectedException('RuntimeException');
+        $this->getSerializard()->unserialize(new \stdClass(), 'stdClass', 'invalid');
+    }
+
+    public function testMissingClassSerializationHandler()
+    {
+        $this->setExpectedException('RuntimeException');
+        $this->getSerializard()->serialize(new \stdClass(), 'json');
     }
 }

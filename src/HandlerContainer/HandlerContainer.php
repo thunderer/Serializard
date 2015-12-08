@@ -22,6 +22,6 @@ final class HandlerContainer implements  HandlerContainerInterface
 
     public function getHandler($class)
     {
-        return $this->handlers[$class];
+        return array_key_exists($class, $this->handlers) ? $this->handlers[$class] : null;
     }
 }

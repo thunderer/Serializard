@@ -24,11 +24,22 @@ final class Serializard
 
     public function serialize($var, $format)
     {
-        return $this->formats->get($format)->serialize($var, $this->normalizers);
+        return $this->getFormat($format)->serialize($var, $this->normalizers);
     }
 
     public function unserialize($var, $class, $format)
     {
-        return $this->formats->get($format)->unserialize($var, $class, $this->hydrators);
+        return $this->getFormat($format)->unserialize($var, $class, $this->hydrators);
+    }
+
+    private function getFormat($alias)
+    {
+        $format = $this->formats->get($alias);
+
+        if(false === $format instanceof FormatInterface) {
+            throw new \RuntimeException(sprintf('No registered format for alias %s!', $alias));
+        }
+
+        return $format;
     }
 }

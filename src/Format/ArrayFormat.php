@@ -6,7 +6,7 @@ use Thunder\Serializard\HandlerContainer\HandlerContainerInterface as Handlers;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-class ArrayFormat extends AbstractFormat implements FormatInterface
+final class ArrayFormat extends AbstractFormat implements FormatInterface
 {
     public function serialize($var, Handlers $handlers)
     {

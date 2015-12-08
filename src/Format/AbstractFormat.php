@@ -11,7 +11,14 @@ abstract class AbstractFormat implements FormatInterface
     protected function doSerialize($var, Handlers $handlers)
     {
         if(is_object($var)) {
-            return $this->doSerialize(call_user_func_array($handlers->getHandler(get_class($var)), array($var)), $handlers);
+            $class = get_class($var);
+            $handler = $handlers->getHandler($class);
+
+            if(null === $handler) {
+                throw new \RuntimeException(sprintf('No serialization handler for class %s!', $class));
+            }
+
+            return $this->doSerialize(call_user_func_array($handler, array($var)), $handlers);
         }
 
         if(is_array($var)) {

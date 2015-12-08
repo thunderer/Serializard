@@ -15,8 +15,8 @@ final class FormatContainer implements FormatContainerInterface
         $this->formats[$class] = $handler;
     }
 
-    public function get($class)
+    public function get($alias)
     {
-        return $this->formats[$class];
+        return array_key_exists($alias, $this->formats) ? $this->formats[$alias] : null;
     }
 }
