@@ -63,8 +63,8 @@ final class XmlFormat implements FormatInterface
             if($node->nodeName === '#text') {
                 continue;
             }
-            if($node->childNodes->length === 1 && $node->childNodes[0] instanceof \DOMText) {
-                $ret[$node->tagName] = $node->childNodes[0]->nodeValue;
+            if($node->childNodes->length === 1 && $node->childNodes->item(0) instanceof \DOMText) {
+                $ret[$node->tagName] = $node->childNodes->item(0)->nodeValue;
                 continue;
             }
             $result = $this->parse($doc, $node);
