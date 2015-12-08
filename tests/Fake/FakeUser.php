@@ -1,12 +1,11 @@
 <?php
 namespace Thunder\Serializard\Tests\Fake;
 
-use Thunder\Clausure\Clausure;
-
 final class FakeUser
 {
     private $id;
     private $name;
+    /** @var FakeTag[] */
     private $tags = array();
     private $tag;
 
@@ -30,9 +29,13 @@ final class FakeUser
         $this->tags[] = $tag;
     }
 
-    public function removeTag(FakeTag $tag)
+    public function removeTag(FakeTag $removed)
     {
-        $this->tags = array_intersect($this->tags, Clausure::filterMethod($this->tags, 'getName', $tag->getName()));
+        foreach($this->tags as $key => $tag) {
+            if($removed->getName() === $tag->getName()) {
+                unset($this->tags[$key]);
+            }
+        }
     }
 
     public function getTags() { return $this->tags; }
