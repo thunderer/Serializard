@@ -6,14 +6,14 @@ namespace Thunder\Serializard\HandlerContainer;
  */
 interface HandlerContainerInterface
 {
-    public function add($class, $alias, $handler);
+    public function add($class, $root, $handler);
 
     /**
      * @param string $class Class name
      *
      * @return string
      */
-    public function getAlias($class);
+    public function getRoot($class);
 
     /**
      * @param string $class Class name

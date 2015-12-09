@@ -24,7 +24,7 @@ final class XmlFormat implements FormatInterface
             case is_object($var): {
                 $handler = $handlers->getHandler(get_class($var));
                 $arr = $handler($var);
-                $this->doSerialize($arr, $handlers, $doc, $parent, $handlers->getAlias(get_class($var)));
+                $this->doSerialize($arr, $handlers, $doc, $parent, $handlers->getRoot(get_class($var)));
                 break;
             }
             case is_array($var): {
@@ -50,7 +50,7 @@ final class XmlFormat implements FormatInterface
         $data = $this->parse($doc, $doc);
         $hydrator = $handlers->getHandler($class);
 
-        return $hydrator($data[$handlers->getAlias($class)], $handlers);
+        return $hydrator($data[$handlers->getRoot($class)], $handlers);
     }
 
     private function parse(\DOMDocument $doc, $parent = null)
