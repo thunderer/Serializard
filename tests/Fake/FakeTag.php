@@ -5,6 +5,7 @@ final class FakeTag
 {
     private $id;
     private $name;
+    private $user;
 
     function __construct($id, $name)
     {
@@ -17,4 +18,7 @@ final class FakeTag
 
     public function setName($name) { $this->name = $name; return $this; }
     public function getName() { return $this->name; }
+
+    public function setUser(FakeUser $user) { $this->user = $user; return $this; }
+    public function getUser() { return $this->user; }
 }

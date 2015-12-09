@@ -1,7 +1,7 @@
 {
     "name": "thunderer/serializard",
     "description": "Flexible serializer",
-    "keywords": ["serializer"],
+    "keywords": ["serializer", "library"],
     "license": "MIT",
     "authors": [
         {
@@ -11,7 +11,7 @@
     ],
     "require": {
         "php": ">=5.3",
-        "symfony/yaml": "~2.3"
+        "symfony/yaml": "~2.3|~3"
     },
     "require-dev": {
         "phpunit/phpunit": "~4|~5"

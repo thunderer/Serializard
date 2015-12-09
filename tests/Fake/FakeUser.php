@@ -5,9 +5,9 @@ final class FakeUser
 {
     private $id;
     private $name;
+    private $tag;
     /** @var FakeTag[] */
     private $tags = array();
-    private $tag;
 
     function __construct($id, $name, FakeTag $tag)
     {
@@ -26,6 +26,8 @@ final class FakeUser
 
     public function addTag(FakeTag $tag)
     {
+        $tag->setUser($this);
+
         $this->tags[] = $tag;
     }
 

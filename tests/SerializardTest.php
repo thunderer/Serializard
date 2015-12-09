@@ -8,6 +8,7 @@ use Thunder\Serializard\Format\YamlFormat;
 use Thunder\Serializard\FormatContainer\FormatContainer;
 use Thunder\Serializard\HandlerContainer\HandlerContainer;
 use Thunder\Serializard\HandlerContainer\HandlerContainerInterface as Handlers;
+use Thunder\Serializard\Normalizer\ReflectionNormalizer;
 use Thunder\Serializard\Serializard;
 use Thunder\Serializard\Tests\Fake\FakeTag;
 use Thunder\Serializard\Tests\Fake\FakeUser;
@@ -69,14 +70,7 @@ class SerializardTest extends \PHPUnit_Framework_TestCase
         $tagClass = 'Thunder\Serializard\Tests\Fake\FakeTag';
 
         $normalizers = new HandlerContainer();
-        $normalizers->add($userClass, 'user', function(FakeUser $user) {
-            return array(
-                'id' => $user->getId(),
-                'name' => $user->getName(),
-                'tag' => $user->getTag(),
-                'tags' => $user->getTags(),
-            );
-        });
+        $normalizers->add($userClass, 'user', new ReflectionNormalizer());
         $normalizers->add($tagClass, 'tag', function(FakeTag $tag) {
             return array(
                 'id' => $tag->getId(),
