@@ -12,7 +12,7 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase
 {
     public function testReflectionSkip()
     {
-        $normalizer = new ReflectionNormalizer(['tag', 'tags']);
+        $normalizer = new ReflectionNormalizer(array('tag', 'tags'));
         $object = new FakeUser(12, 'XXX', new FakeTag(144, 'YYY'));
 
         $this->assertSame(array('id' => 12, 'name' => 'XXX'), $normalizer($object));
