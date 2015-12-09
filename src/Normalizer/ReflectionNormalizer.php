@@ -8,7 +8,7 @@ final class ReflectionNormalizer
 {
     private $skipped;
 
-    public function __construct(array $skipped = [])
+    public function __construct(array $skipped = array())
     {
         $this->skipped = $skipped;
     }
@@ -17,7 +17,7 @@ final class ReflectionNormalizer
     {
         $ref = new \ReflectionObject($var);
 
-        $result = [];
+        $result = array();
         foreach($ref->getProperties() as $property) {
             if(in_array($property->getName(), $this->skipped)) {
                 continue;
