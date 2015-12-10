@@ -20,27 +20,34 @@ final class XmlFormat implements FormatInterface
         $doc->formatOutput = true;
         $parent = $parent ?: $doc;
 
-        switch(true) {
-            case is_object($var): {
-                $handler = $handlers->getHandler(get_class($var));
-                $arr = $handler($var);
-                $this->doSerialize($arr, $handlers, $doc, $parent, $handlers->getRoot(get_class($var)));
-                break;
-            }
-            case is_array($var): {
-                $item = $key ? $doc->createElement($key) : $parent;
-                foreach($var as $index => $value) {
-                    $this->doSerialize($value, $handlers, $doc, $item, $index);
-                }
-                !$key ?: $parent->appendChild($item);
-                break;
-            }
-            default: {
-                $parent->appendChild($doc->createElement($key, $var));
-            }
-        }
+        $this->serializeValue($var, $handlers, $doc, $parent, $key);
 
         return $isRoot ? $doc->saveXML() : null;
+    }
+
+    private function serializeValue($var, Handlers $handlers, $doc, $parent, $key)
+    {
+        /** @var \DOMDocument|\DOMElement $doc */
+        /** @var \DOMDocument|\DOMElement $parent */
+        if(is_object($var)) {
+            $handler = $handlers->getHandler(get_class($var));
+            $arr = $handler($var);
+            $this->doSerialize($arr, $handlers, $doc, $parent, $handlers->getRoot(get_class($var)));
+
+            return;
+        }
+
+        if(is_array($var)) {
+            $item = $key ? $doc->createElement($key) : $parent;
+            foreach($var as $index => $value) {
+                $this->doSerialize($value, $handlers, $doc, $item, $index);
+            }
+            !$key ?: $parent->appendChild($item);
+
+            return;
+        }
+
+        $parent->appendChild($doc->createElement($key, $var));
     }
 
     public function unserialize($var, $class, Handlers $handlers)
