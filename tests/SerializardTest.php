@@ -12,6 +12,9 @@ use Thunder\Serializard\Normalizer\ReflectionNormalizer;
 use Thunder\Serializard\Serializard;
 use Thunder\Serializard\Tests\Fake\FakeTag;
 use Thunder\Serializard\Tests\Fake\FakeUser;
+use Thunder\Serializard\Tests\Fake\Interfaces\TypeA;
+use Thunder\Serializard\Tests\Fake\Interfaces\TypeB;
+use Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -62,6 +65,28 @@ class SerializardTest extends \PHPUnit_Framework_TestCase
                 return $user;
             }),
         );
+    }
+
+    public function testInterfaces()
+    {
+        $interface = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface';
+        $handlers = new HandlerContainer();
+        $handlers->add($interface, 'type', function(TypeInterface $type) {
+            return [
+                'type' => $type->getType(),
+                'value' => $type->getValue(),
+            ];
+        });
+
+        $normalizers = new HandlerContainer();
+
+        $formats = new FormatContainer();
+        $formats->add('array', new ArrayFormat());
+
+        $serializard = new Serializard($formats, $handlers, $normalizers);
+
+        $this->assertSame(array('type' => 'typeA', 'value' => 'valueA'), $serializard->serialize(new TypeA(), 'array'));
+        $this->assertSame(array('type' => 'typeB', 'value' => 'valueB'), $serializard->serialize(new TypeB(), 'array'));
     }
 
     private function getSerializard()

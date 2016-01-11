@@ -7,6 +7,7 @@ namespace Thunder\Serializard\HandlerContainer;
 final class HandlerContainer implements HandlerContainerInterface
 {
     private $handlers = array();
+    private $interfaces = array();
     private $aliases = array();
 
     public function add($class, $root, $handler)
@@ -15,8 +16,15 @@ final class HandlerContainer implements HandlerContainerInterface
             throw new \RuntimeException(sprintf('Invalid handler for class %s!', $class));
         }
 
-        $this->aliases[$class] = $root;
-        $this->handlers[$class] = $handler;
+        if(class_exists($class)) {
+            $this->aliases[$class] = $root;
+            $this->handlers[$class] = $handler;
+        } elseif(interface_exists($class)) {
+            $this->aliases[$class] = $root;
+            $this->interfaces[$class] = $handler;
+        } else {
+            throw new \RuntimeException(sprintf('Given value %s is neither class nor interface name!', $class));
+        }
     }
 
     public function addAlias($alias, $class)
@@ -38,6 +46,19 @@ final class HandlerContainer implements HandlerContainerInterface
 
     public function getHandler($class)
     {
-        return array_key_exists($class, $this->handlers) ? $this->handlers[$class] : null;
+        if(array_key_exists($class, $this->handlers)) {
+            return $this->handlers[$class];
+        }
+
+        $implemented = array_intersect(array_keys($this->interfaces), array_values(class_implements($class)));
+        if($implemented) {
+            if(count($implemented) > 1) {
+                throw new \RuntimeException(sprintf('Class %s implements interfaces with colliding handlers!', $class));
+            }
+
+            return $this->interfaces[$implemented[0]];
+        }
+
+        return null;
     }
 }

@@ -6,8 +6,6 @@ namespace Thunder\Serializard\HandlerContainer;
  */
 interface HandlerContainerInterface
 {
-    public function add($class, $root, $handler);
-
     /**
      * @param string $class Class name
      *
