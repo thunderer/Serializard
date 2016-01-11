@@ -72,10 +72,10 @@ class SerializardTest extends \PHPUnit_Framework_TestCase
         $interface = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface';
         $handlers = new HandlerContainer();
         $handlers->add($interface, 'type', function(TypeInterface $type) {
-            return [
+            return array(
                 'type' => $type->getType(),
                 'value' => $type->getValue(),
-            ];
+            );
         });
 
         $normalizers = new HandlerContainer();
