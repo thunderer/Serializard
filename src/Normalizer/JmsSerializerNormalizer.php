@@ -63,6 +63,12 @@ final class JmsSerializerNormalizer
             // no method or property found, skip current key
         }
 
+        if(array_key_exists('virtual_properties', $yaml)) {
+            foreach($yaml['virtual_properties'] as $method => $config) {
+                $result[$config['serialized_name']] = call_user_func_array([$var, $method], []);
+            }
+        }
+
         return $result;
     }
 }
