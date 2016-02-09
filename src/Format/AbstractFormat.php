@@ -8,7 +8,7 @@ use Thunder\Serializard\HandlerContainer\HandlerContainerInterface as Handlers;
  */
 abstract class AbstractFormat implements FormatInterface
 {
-    protected function doSerialize($var, Handlers $handlers)
+    protected function doSerialize($var, Handlers $handlers, array $state = array(), array $classes = array())
     {
         if(is_object($var)) {
             $class = get_class($var);
@@ -18,13 +18,19 @@ abstract class AbstractFormat implements FormatInterface
                 throw new \RuntimeException(sprintf('No serialization handler for class %s!', $class));
             }
 
-            return $this->doSerialize(call_user_func_array($handler, array($var)), $handlers);
+            $newState = array_merge($state, array(spl_object_hash($var)));
+            $newClasses = array_merge($classes, array(get_class($var)));
+            if(count(array_keys($state, spl_object_hash($var), true)) > 1) {
+                throw new \RuntimeException('Nesting cycle: '.implode(' -> ', $newClasses));
+            }
+
+            return $this->doSerialize(call_user_func_array($handler, array($var)), $handlers, $newState, $newClasses);
         }
 
         if(is_array($var)) {
             $return = array();
             foreach($var as $key => $value) {
-                $return[$key] = $this->doSerialize($value, $handlers);
+                $return[$key] = $this->doSerialize($value, $handlers, $state, $classes);
             }
 
             return $return;

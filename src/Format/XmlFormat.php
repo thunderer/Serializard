@@ -13,26 +13,33 @@ final class XmlFormat implements FormatInterface
         return $this->doSerialize($var, $handlers);
     }
 
-    private function doSerialize($var, Handlers $handlers, $doc = null, $parent = null, $key = null)
+    private function doSerialize($var, Handlers $handlers, $doc = null, $parent = null, $key = null, array $state = array(), array $classes = array())
     {
         $isRoot = ($doc === null);
         $doc = $doc ?: new \DOMDocument('1.0', 'utf-8');
         $doc->formatOutput = true;
         $parent = $parent ?: $doc;
 
-        $this->serializeValue($var, $handlers, $doc, $parent, $key);
+        $this->serializeValue($var, $handlers, $doc, $parent, $key, $state, $classes);
 
         return $isRoot ? $doc->saveXML() : null;
     }
 
-    private function serializeValue($var, Handlers $handlers, $doc, $parent, $key)
+    private function serializeValue($var, Handlers $handlers, $doc, $parent, $key, array $state = array(), array $classes = array())
     {
         /** @var \DOMDocument|\DOMElement $doc */
         /** @var \DOMDocument|\DOMElement $parent */
         if(is_object($var)) {
             $handler = $handlers->getHandler(get_class($var));
             $arr = $handler($var);
-            $this->doSerialize($arr, $handlers, $doc, $parent, $handlers->getRoot(get_class($var)));
+
+            $newState = array_merge($state, array(spl_object_hash($var)));
+            $newClasses = array_merge($classes, array(get_class($var)));
+            if(count(array_keys($state, spl_object_hash($var), true)) > 1) {
+                throw new \RuntimeException('Nesting cycle: '.implode(' -> ', $newClasses));
+            }
+
+            $this->doSerialize($arr, $handlers, $doc, $parent, $handlers->getRoot(get_class($var)), $newState, $newClasses);
 
             return;
         }
@@ -40,7 +47,7 @@ final class XmlFormat implements FormatInterface
         if(is_array($var)) {
             $item = $key ? $doc->createElement($key) : $parent;
             foreach($var as $index => $value) {
-                $this->doSerialize($value, $handlers, $doc, $item, $index);
+                $this->doSerialize($value, $handlers, $doc, $item, $index, $state, $classes);
             }
             !$key ?: $parent->appendChild($item);
 

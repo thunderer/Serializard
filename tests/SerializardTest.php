@@ -89,6 +89,47 @@ class SerializardTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(array('type' => 'typeB', 'value' => 'valueB'), $serializard->serialize(new TypeB(), 'array'));
     }
 
+    /** @dataProvider provideCycles */
+    public function testCycleException($var, $format)
+    {
+        $userClass = 'Thunder\Serializard\Tests\Fake\FakeUser';
+        $tagClass = 'Thunder\Serializard\Tests\Fake\FakeTag';
+
+        $normalizers = new HandlerContainer();
+        $normalizers->add($userClass, 'user', new ReflectionNormalizer());
+        $normalizers->add($tagClass, 'tag', new ReflectionNormalizer());
+
+        $hydrators = new HandlerContainer();
+
+        $formats = new FormatContainer();
+        $formats->add('xml', new XmlFormat());
+        $formats->add('yaml', new YamlFormat());
+        $formats->add('json', new JsonFormat());
+        $formats->add('array', new ArrayFormat());
+
+        $serializard = new Serializard($formats, $normalizers, $hydrators);
+
+
+
+        $this->setExpectedException('RuntimeException');
+        $serializard->serialize($var, $format);
+    }
+
+    public function provideCycles()
+    {
+        $user = new FakeUser(1, 'Thomas', new FakeTag(100, 'various'));
+        $user->addTag(new FakeTag(10, 'sth'));
+        $user->addTag(new FakeTag(11, 'xyz'));
+        $user->addTag(new FakeTag(12, 'rnd'));
+
+        return array(
+            array($user, 'xml'),
+            array($user, 'json'),
+            array($user, 'yaml'),
+            array($user, 'array'),
+        );
+    }
+
     private function getSerializard()
     {
         $userClass = 'Thunder\Serializard\Tests\Fake\FakeUser';
