@@ -33,13 +33,14 @@ final class XmlFormat implements FormatInterface
             $handler = $handlers->getHandler(get_class($var));
             $arr = $handler($var);
 
-            $newState = array_merge($state, array(spl_object_hash($var)));
-            $newClasses = array_merge($classes, array(get_class($var)));
-            if(count(array_keys($state, spl_object_hash($var), true)) > 1) {
-                throw new \RuntimeException('Nesting cycle: '.implode(' -> ', $newClasses));
+            $hash = spl_object_hash($var);
+            $classes[] = get_class($var);
+            if(isset($state[$hash])) {
+                throw new \RuntimeException('Nesting cycle: '.implode(' -> ', $classes));
             }
+            $state[$hash] = 1;
 
-            $this->doSerialize($arr, $handlers, $doc, $parent, $handlers->getRoot(get_class($var)), $newState, $newClasses);
+            $this->doSerialize($arr, $handlers, $doc, $parent, $handlers->getRoot(get_class($var)), $state, $classes);
 
             return;
         }

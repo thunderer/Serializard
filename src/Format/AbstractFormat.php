@@ -18,13 +18,14 @@ abstract class AbstractFormat implements FormatInterface
                 throw new \RuntimeException(sprintf('No serialization handler for class %s!', $class));
             }
 
-            $newState = array_merge($state, array(spl_object_hash($var)));
-            $newClasses = array_merge($classes, array(get_class($var)));
-            if(count(array_keys($state, spl_object_hash($var), true)) > 1) {
-                throw new \RuntimeException('Nesting cycle: '.implode(' -> ', $newClasses));
+            $hash = spl_object_hash($var);
+            $classes[] = get_class($var);
+            if(isset($state[$hash])) {
+                throw new \RuntimeException('Nesting cycle: '.implode(' -> ', $classes));
             }
+            $state[$hash] = 1;
 
-            return $this->doSerialize(call_user_func_array($handler, array($var)), $handlers, $newState, $newClasses);
+            return $this->doSerialize(call_user_func_array($handler, array($var)), $handlers, $state, $classes);
         }
 
         if(is_array($var)) {
