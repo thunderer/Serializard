@@ -1,10 +1,10 @@
 <?php
-namespace Thunder\Serializard\HandlerContainer;
+namespace Thunder\Serializard\HydratorContainer;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class HandlerContainer implements HandlerContainerInterface
+final class HydratorContainer implements HydratorContainerInterface
 {
     private $handlers = array();
     private $interfaces = array();
@@ -50,13 +50,18 @@ final class HandlerContainer implements HandlerContainerInterface
             return $this->handlers[$class];
         }
 
-        $implemented = array_intersect(array_keys($this->interfaces), array_values(class_implements($class)));
-        if($implemented) {
-            if(count($implemented) > 1) {
+        $parents = array_intersect(array_keys($this->handlers), class_parents($class));
+        if($parents) {
+            return $this->handlers[array_pop($parents)];
+        }
+
+        $interfaces = array_intersect(array_keys($this->interfaces), array_values(class_implements($class)));
+        if($interfaces) {
+            if(count($interfaces) > 1) {
                 throw new \RuntimeException(sprintf('Class %s implements interfaces with colliding handlers!', $class));
             }
 
-            return $this->interfaces[$implemented[0]];
+            return $this->interfaces[$interfaces[0]];
         }
 
         return null;

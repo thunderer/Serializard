@@ -11,7 +11,7 @@ Serializard is a library for (un)serialization of data of any complexity. Its ma
 
 # Installation
 
-This library is available on Composer/Packagist as `thunderer/shortcode`.
+This library is available on Composer/Packagist as `thunderer/serializard`.
 
 # Usage
 

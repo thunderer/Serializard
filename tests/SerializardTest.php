@@ -6,12 +6,15 @@ use Thunder\Serializard\Format\JsonFormat;
 use Thunder\Serializard\Format\XmlFormat;
 use Thunder\Serializard\Format\YamlFormat;
 use Thunder\Serializard\FormatContainer\FormatContainer;
-use Thunder\Serializard\HandlerContainer\HandlerContainer;
-use Thunder\Serializard\HandlerContainer\HandlerContainerInterface as Handlers;
+use Thunder\Serializard\HydratorContainer\HydratorContainer;
+use Thunder\Serializard\HydratorContainer\HydratorContainerInterface as Hydrators;
 use Thunder\Serializard\Normalizer\ReflectionNormalizer;
+use Thunder\Serializard\NormalizerContainer\NormalizerContainer;
 use Thunder\Serializard\Serializard;
 use Thunder\Serializard\Tests\Fake\FakeTag;
 use Thunder\Serializard\Tests\Fake\FakeUser;
+use Thunder\Serializard\Tests\Fake\FakeUserParent;
+use Thunder\Serializard\Tests\Fake\FakeUserParentParent;
 use Thunder\Serializard\Tests\Fake\Interfaces\TypeA;
 use Thunder\Serializard\Tests\Fake\Interfaces\TypeB;
 use Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface;
@@ -70,20 +73,20 @@ class SerializardTest extends \PHPUnit_Framework_TestCase
     public function testInterfaces()
     {
         $interface = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface';
-        $handlers = new HandlerContainer();
-        $handlers->add($interface, 'type', function(TypeInterface $type) {
+        $normalizers = new NormalizerContainer();
+        $normalizers->add($interface, 'type', function(TypeInterface $type) {
             return array(
                 'type' => $type->getType(),
                 'value' => $type->getValue(),
             );
         });
 
-        $normalizers = new HandlerContainer();
+        $hydrators = new HydratorContainer();
 
         $formats = new FormatContainer();
         $formats->add('array', new ArrayFormat());
 
-        $serializard = new Serializard($formats, $handlers, $normalizers);
+        $serializard = new Serializard($formats, $normalizers, $hydrators);
 
         $this->assertSame(array('type' => 'typeA', 'value' => 'valueA'), $serializard->serialize(new TypeA(), 'array'));
         $this->assertSame(array('type' => 'typeB', 'value' => 'valueB'), $serializard->serialize(new TypeB(), 'array'));
@@ -95,11 +98,11 @@ class SerializardTest extends \PHPUnit_Framework_TestCase
         $userClass = 'Thunder\Serializard\Tests\Fake\FakeUser';
         $tagClass = 'Thunder\Serializard\Tests\Fake\FakeTag';
 
-        $normalizers = new HandlerContainer();
+        $normalizers = new NormalizerContainer();
         $normalizers->add($userClass, 'user', new ReflectionNormalizer());
         $normalizers->add($tagClass, 'tag', new ReflectionNormalizer());
 
-        $hydrators = new HandlerContainer();
+        $hydrators = new HydratorContainer();
 
         $formats = new FormatContainer();
         $formats->add('xml', new XmlFormat());
@@ -108,8 +111,6 @@ class SerializardTest extends \PHPUnit_Framework_TestCase
         $formats->add('array', new ArrayFormat());
 
         $serializard = new Serializard($formats, $normalizers, $hydrators);
-
-
 
         $this->setExpectedException('RuntimeException');
         $serializard->serialize($var, $format);
@@ -135,7 +136,7 @@ class SerializardTest extends \PHPUnit_Framework_TestCase
         $userClass = 'Thunder\Serializard\Tests\Fake\FakeUser';
         $tagClass = 'Thunder\Serializard\Tests\Fake\FakeTag';
 
-        $normalizers = new HandlerContainer();
+        $normalizers = new NormalizerContainer();
         $normalizers->add($userClass, 'user', new ReflectionNormalizer());
         $normalizers->add($tagClass, 'tag', function(FakeTag $tag) {
             return array(
@@ -144,8 +145,8 @@ class SerializardTest extends \PHPUnit_Framework_TestCase
             );
         });
 
-        $hydrators = new HandlerContainer();
-        $hydrators->add($userClass, 'user', function(array $data, Handlers $handlers) use($tagClass) {
+        $hydrators = new HydratorContainer();
+        $hydrators->add($userClass, 'user', function(array $data, Hydrators $handlers) use($tagClass) {
             $tagHandler = $handlers->getHandler($tagClass);
 
             $user = new FakeUser($data['id'], $data['name'], $tagHandler($data['tag'], $handlers));
@@ -155,7 +156,7 @@ class SerializardTest extends \PHPUnit_Framework_TestCase
 
             return $user;
         });
-        $hydrators->add($tagClass, 'tag', function(array $data, Handlers $handlers) {
+        $hydrators->add($tagClass, 'tag', function(array $data, Hydrators $handlers) {
             return new FakeTag($data['id'], $data['name']);
         });
 
@@ -166,6 +167,27 @@ class SerializardTest extends \PHPUnit_Framework_TestCase
         $formats->add('array', new ArrayFormat());
 
         return new Serializard($formats, $normalizers, $hydrators);
+    }
+
+    public function testParent()
+    {
+        $userClass = 'Thunder\Serializard\Tests\Fake\FakeUser';
+        $user = new FakeUser(1, 'em@ail.com', new FakeTag(1, 'tag'));
+
+        $formats = new FormatContainer();
+        $formats->add('array', new ArrayFormat());
+        $normalizers = new NormalizerContainer();
+        $hydrators = new HydratorContainer();
+        $serializard = new Serializard($formats, $normalizers, $hydrators);
+
+        $normalizers->add($userClass.'ParentParent', 'user', function(FakeUserParentParent $user) { return 'ancestor'; });
+        $this->assertSame('ancestor', $serializard->serialize($user, 'array'));
+
+        $normalizers->add($userClass.'Parent', 'user', function(FakeUserParent $user) { return 'parent'; });
+        $this->assertSame('parent', $serializard->serialize($user, 'array'));
+
+        $normalizers->add($userClass, 'user', function(FakeUser $user) { return 'user'; });
+        $this->assertSame('user', $serializard->serialize($user, 'array'));
     }
 
     public function testInvalidSerializationFormat()

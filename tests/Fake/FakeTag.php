@@ -19,6 +19,6 @@ final class FakeTag
     public function setName($name) { $this->name = $name; return $this; }
     public function getName() { return $this->name; }
 
-    public function setUser(FakeUser $user) { $this->user = $user; return $this; }
+    public function setUser(FakeUserParentParent $user) { $this->user = $user; return $this; }
     public function getUser() { return $this->user; }
 }

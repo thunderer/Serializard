@@ -1,10 +1,10 @@
 <?php
-namespace Thunder\Serializard\HandlerContainer;
+namespace Thunder\Serializard\HydratorContainer;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-interface HandlerContainerInterface
+interface HydratorContainerInterface
 {
     /**
      * @param string $class Class name

@@ -1,20 +1,21 @@
 <?php
 namespace Thunder\Serializard\Format;
 
-use Thunder\Serializard\HandlerContainer\HandlerContainerInterface as Handlers;
+use Thunder\Serializard\NormalizerContainer\NormalizerContainerInterface as Normalizers;
+use Thunder\Serializard\HydratorContainer\HydratorContainerInterface as Hydrators;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 final class JsonFormat extends AbstractFormat implements FormatInterface
 {
-    public function serialize($var, Handlers $handlers)
+    public function serialize($var, Normalizers $normalizers)
     {
-        return json_encode($this->doSerialize($var, $handlers));
+        return json_encode($this->doSerialize($var, $normalizers));
     }
 
-    public function unserialize($var, $class, Handlers $handlers)
+    public function unserialize($var, $class, Hydrators $hydrators)
     {
-        return call_user_func_array($handlers->getHandler($class), array(json_decode($var, true), $handlers));
+        return $this->doUnserialize(json_decode($var, true), $class, $hydrators);
     }
 }

@@ -7,7 +7,7 @@ use Symfony\Component\Yaml\Yaml;
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  * @codeCoverageIgnore
  */
-final class JmsSerializerNormalizer
+final class JmsYamlNormalizer
 {
     private $path;
 
@@ -37,7 +37,8 @@ final class JmsSerializerNormalizer
 
         $ref = new \ReflectionObject($var);
         $result = [];
-        foreach($yaml['properties'] as $key => $config) {
+        $properties = array_key_exists('properties', $yaml) ? $yaml['properties'] : array();
+        foreach($properties as $key => $config) {
             if($config['expose'] !== true) {
                 continue;
             }
@@ -63,10 +64,9 @@ final class JmsSerializerNormalizer
             // no method or property found, skip current key
         }
 
-        if(array_key_exists('virtual_properties', $yaml)) {
-            foreach($yaml['virtual_properties'] as $method => $config) {
-                $result[$config['serialized_name']] = call_user_func_array([$var, $method], []);
-            }
+        $virtual = array_key_exists('virtual_properties', $yaml) ? $yaml['virtual_properties'] : array();
+        foreach($virtual as $method => $config) {
+            $result[$config['serialized_name']] = call_user_func_array([$var, $method], []);
         }
 
         return $result;

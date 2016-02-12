@@ -3,7 +3,8 @@ namespace Thunder\Serializard;
 
 use Thunder\Serializard\Format\FormatInterface;
 use Thunder\Serializard\FormatContainer\FormatContainerInterface as Formats;
-use Thunder\Serializard\HandlerContainer\HandlerContainerInterface as Handlers;
+use Thunder\Serializard\HydratorContainer\HydratorContainerInterface as Hydrators;
+use Thunder\Serializard\NormalizerContainer\NormalizerContainerInterface as Normalizers;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -15,7 +16,7 @@ final class Serializard
     /** @var Formats */
     private $formats;
 
-    public function __construct(Formats $formats, Handlers $normalizers, Handlers $hydrators)
+    public function __construct(Formats $formats, Normalizers $normalizers, Hydrators $hydrators)
     {
         $this->normalizers = $normalizers;
         $this->hydrators = $hydrators;
