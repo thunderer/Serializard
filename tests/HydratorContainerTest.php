@@ -1,7 +1,7 @@
 <?php
 namespace Thunder\Serializard\Tests;
 
-use Thunder\Serializard\HydratorContainer\HydratorContainer;
+use Thunder\Serializard\HydratorContainer\FallbackHydratorContainer;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -10,7 +10,7 @@ class HydratorContainerTest extends \PHPUnit_Framework_TestCase
 {
     public function testAlias()
     {
-        $handlers = new HydratorContainer();
+        $handlers = new FallbackHydratorContainer();
         $handlers->add('stdClass', 'std', function() { return 'value'; });
         $handlers->addAlias('DateTime', 'stdClass');
 
@@ -20,7 +20,7 @@ class HydratorContainerTest extends \PHPUnit_Framework_TestCase
 
     public function testInterface()
     {
-        $hydrators = new HydratorContainer();
+        $hydrators = new FallbackHydratorContainer();
         $interfaceName = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface';
         $interfaceTypeA = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeA';
         $interfaceTypeB = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeB';
@@ -32,7 +32,7 @@ class HydratorContainerTest extends \PHPUnit_Framework_TestCase
 
     public function testInheritance()
     {
-        $hydrators = new HydratorContainer();
+        $hydrators = new FallbackHydratorContainer();
         $ancestorName = 'Thunder\Serializard\Tests\Fake\FakeUserParentParent';
         $parentName = 'Thunder\Serializard\Tests\Fake\FakeUserParent';
         $userName = 'Thunder\Serializard\Tests\Fake\FakeUser';
@@ -49,7 +49,7 @@ class HydratorContainerTest extends \PHPUnit_Framework_TestCase
         $typeAnother = 'Thunder\Serializard\Tests\Fake\Interfaces\AnotherTypeInterface';
         $typeMultiple = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeMultiple';
 
-        $hydrators = new HydratorContainer();
+        $hydrators = new FallbackHydratorContainer();
         $hydrators->add($typeInterface, 'type', function() { return 'multiple'; });
         $hydrators->add($typeAnother, 'type', function() { return 'multiple'; });
 
@@ -59,21 +59,21 @@ class HydratorContainerTest extends \PHPUnit_Framework_TestCase
 
     public function testInvalidClassOrInterfaceName()
     {
-        $handlers = new HydratorContainer();
+        $handlers = new FallbackHydratorContainer();
         $this->setExpectedException('RuntimeException');
         $handlers->add('invalid', 'root', function() {});
     }
 
     public function testAliasForInvalidClass()
     {
-        $handlers = new HydratorContainer();
+        $handlers = new FallbackHydratorContainer();
         $this->setExpectedException('RuntimeException');
         $handlers->addAlias('stdClass', 'DateTime');
     }
 
     public function testInvalidHandler()
     {
-        $handlers = new HydratorContainer();
+        $handlers = new FallbackHydratorContainer();
         $this->setExpectedException('RuntimeException');
         $handlers->add('stdClass', 'name', 'invalid');
     }

@@ -7,25 +7,25 @@ use Thunder\Serializard\Format\JsonFormat;
 use Thunder\Serializard\Format\XmlFormat;
 use Thunder\Serializard\Format\YamlFormat;
 use Thunder\Serializard\FormatContainer\FormatContainer;
-use Thunder\Serializard\HydratorContainer\HydratorContainer;
-use Thunder\Serializard\NormalizerContainer\NormalizerContainer;
+use Thunder\Serializard\HydratorContainer\FallbackHydratorContainer;
+use Thunder\Serializard\NormalizerContainer\FallbackNormalizerContainer;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 final class SerializardFacade
 {
-    /** @var NormalizerContainer */
+    /** @var FallbackNormalizerContainer */
     private $normalizers;
-    /** @var HydratorContainer */
+    /** @var FallbackHydratorContainer */
     private $hydrators;
     /** @var FormatContainer */
     private $formats;
 
     public function __construct()
     {
-        $this->normalizers = new NormalizerContainer();
-        $this->hydrators = new HydratorContainer();
+        $this->normalizers = new FallbackNormalizerContainer();
+        $this->hydrators = new FallbackHydratorContainer();
 
         $formats = new FormatContainer();
         $formats->add('json', new JsonFormat());

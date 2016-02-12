@@ -42,13 +42,14 @@ Serialization is controlled by registering callables used in normalization phase
 ```php
 use Thunder\Serializard\Format\JsonFormat;
 use Thunder\Serializard\FormatContainer\FormatContainer;
-use Thunder\Serializard\HandlerContainer\HandlerContainer;
+use Thunder\Serializard\HydratorContainer\FallbackHydratorContainer;
+use Thunder\Serializard\NormalizerContainer\FallbackNormalizerContainer;
 use Thunder\Serializard\Serializard;
 
 $formats = new FormatContainer();
 $formats->add('json', new JsonFormat());
 
-$normalizers = new HandlerContainer();
+$normalizers = new FallbackNormalizerContainer();
 $normalizers->add(User::class, 'user', function(User $user) {
     return [
         'id' => $user->getId(),
@@ -56,7 +57,7 @@ $normalizers->add(User::class, 'user', function(User $user) {
     ];
 });
 
-$hydrators = new HandlerContainer();
+$hydrators = new FallbackHydratorContainer();
 
 $serializard = new Serializard($formats, $normalizers, $hydrators);
 echo $serializard->serialize(new User(1, 'Thomas'), 'json');
@@ -76,15 +77,16 @@ Unserialization can be controlled by registering callables able to reconstruct o
 ```php
 use Thunder\Serializard\Format\JsonFormat;
 use Thunder\Serializard\FormatContainer\FormatContainer;
-use Thunder\Serializard\HandlerContainer\HandlerContainer;
+use Thunder\Serializard\HydratorContainer\FallbackHydratorContainer;
+use Thunder\Serializard\NormalizerContainer\FallbackNormalizerContainer;
 use Thunder\Serializard\Serializard;
 
 $formats = new FormatContainer();
 $formats->add('json', new JsonFormat());
 
-$normalizers = new HandlerContainer();
+$normalizers = new FallbackNormalizerContainer();
 
-$hydrators = new HandlerContainer();
+$hydrators = new FallbackHydratorContainer();
 $hydrators->add(User::class, 'user', function(array $data) {
     return new User($data['id'], $data['name']);
 });

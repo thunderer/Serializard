@@ -1,10 +1,10 @@
 <?php
-namespace Thunder\Serializard\NormalizerContainer;
+namespace Thunder\Serializard\HydratorContainer;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class NormalizerContainer implements NormalizerContainerInterface
+final class FallbackHydratorContainer implements HydratorContainerInterface
 {
     private $handlers = array();
     private $interfaces = array();
