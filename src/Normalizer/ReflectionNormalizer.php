@@ -18,14 +18,18 @@ final class ReflectionNormalizer
         $ref = new \ReflectionObject($var);
 
         $result = array();
-        foreach($ref->getProperties() as $property) {
-            if(in_array($property->getName(), $this->skipped)) {
-                continue;
+        while($ref) {
+            foreach($ref->getProperties() as $property) {
+                if(in_array($property->getName(), $this->skipped)) {
+                    continue;
+                }
+
+                $property->setAccessible(true);
+
+                $result[$property->getName()] = $property->getValue($var);
             }
 
-            $property->setAccessible(true);
-
-            $result[$property->getName()] = $property->getValue($var);
+            $ref = $ref->getParentClass();
         }
 
         return $result;

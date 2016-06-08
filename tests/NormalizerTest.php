@@ -2,6 +2,7 @@
 namespace Thunder\Serializard\Tests;
 
 use Thunder\Serializard\Normalizer\ReflectionNormalizer;
+use Thunder\Serializard\Tests\Fake\Inheritance\FakeClass;
 use Thunder\Serializard\Tests\Fake\FakeTag;
 use Thunder\Serializard\Tests\Fake\FakeUser;
 
@@ -16,5 +17,16 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase
         $object = new FakeUser(12, 'XXX', new FakeTag(144, 'YYY'));
 
         $this->assertSame(array('id' => 12, 'name' => 'XXX'), $normalizer($object));
+    }
+
+    public function testReflectionInheritance()
+    {
+        $normalizer = new ReflectionNormalizer();
+
+        $this->assertSame(array(
+            'property' => 'property',
+            'parentProperty' => 'parent',
+            'parentParentProperty' => 'parentParent',
+        ), $normalizer(new FakeClass('parentParent', 'parent', 'property')));
     }
 }
