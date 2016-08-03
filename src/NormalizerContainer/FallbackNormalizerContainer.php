@@ -61,7 +61,7 @@ final class FallbackNormalizerContainer implements NormalizerContainerInterface
                 throw new \RuntimeException(sprintf('Class %s implements interfaces with colliding handlers!', $class));
             }
 
-            return $this->interfaces[$interfaces[0]];
+            return $this->interfaces[array_shift($interfaces)];
         }
 
         return null;
