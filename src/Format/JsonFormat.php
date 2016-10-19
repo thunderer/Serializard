@@ -3,14 +3,16 @@ namespace Thunder\Serializard\Format;
 
 use Thunder\Serializard\NormalizerContainer\NormalizerContainerInterface as Normalizers;
 use Thunder\Serializard\HydratorContainer\HydratorContainerInterface as Hydrators;
+use Thunder\Serializard\NormalizerContext\NormalizerContextInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 final class JsonFormat extends AbstractFormat
 {
-    public function serialize($var, Normalizers $normalizers)
+    public function serialize($var, Normalizers $normalizers, NormalizerContextInterface $context)
     {
+<<<<<<< 0e7db18815c6ecb0c21c0ef8bba2c7d7e9ceafcf
         $json = @json_encode($this->doSerialize($var, $normalizers));
 
         if(json_last_error() !== JSON_ERROR_NONE) {
@@ -18,6 +20,9 @@ final class JsonFormat extends AbstractFormat
         }
 
         return $json;
+=======
+        return json_encode($this->doSerialize($var, $normalizers, $context));
+>>>>>>> added serialization contexts
     }
 
     public function unserialize($var, $class, Hydrators $hydrators)

@@ -1,14 +1,12 @@
 {
     "name": "thunderer/serializard",
     "description": "Flexible serializer",
-    "keywords": ["serializer", "library"],
+    "keywords": ["serializer", "library", "xml", "yaml", "json", "normalizer", "hydrator"],
     "license": "MIT",
-    "authors": [
-        {
-            "name": "Tomasz Kowalczyk",
-            "email": "tomasz@kowalczyk.cc"
-        }
-    ],
+    "authors": [{
+        "name": "Tomasz Kowalczyk",
+        "email": "tomasz@kowalczyk.cc"
+    }],
     "require": {
         "php": "^5.3|^7.0",
         "symfony/yaml": "^2.3|^3.0"

@@ -3,13 +3,14 @@ namespace Thunder\Serializard\Format;
 
 use Thunder\Serializard\HydratorContainer\HydratorContainerInterface as Hydrators;
 use Thunder\Serializard\NormalizerContainer\NormalizerContainerInterface as Normalizers;
+use Thunder\Serializard\NormalizerContext\NormalizerContextInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 abstract class AbstractFormat implements FormatInterface
 {
-    protected function doSerialize($var, Normalizers $handlers, array $state = array(), array $classes = array())
+    protected function doSerialize($var, Normalizers $handlers, NormalizerContextInterface $context, array $state = array(), array $classes = array())
     {
         if(is_object($var)) {
             $class = get_class($var);
@@ -26,17 +27,19 @@ abstract class AbstractFormat implements FormatInterface
             }
             $state[$hash] = 1;
 
-            return $this->doSerialize(call_user_func_array($handler, array($var)), $handlers, $state, $classes);
+            return $this->doSerialize(call_user_func_array($handler, array($var, $context)), $handlers, $context->withParent($var), $state, $classes);
         }
 
         if(is_array($var)) {
             $return = array();
             foreach($var as $key => $value) {
-                $return[$key] = $this->doSerialize($value, $handlers, $state, $classes);
+                $return[$key] = $this->doSerialize($value, $handlers, $context, $state, $classes);
             }
 
             return $return;
         }
+
+        // FIXME: just return scalars, exception for different types like resources or streams
 
         return $var;
     }

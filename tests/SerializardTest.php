@@ -10,7 +10,9 @@ use Thunder\Serializard\HydratorContainer\FallbackHydratorContainer;
 use Thunder\Serializard\HydratorContainer\HydratorContainerInterface as Hydrators;
 use Thunder\Serializard\Normalizer\ReflectionNormalizer;
 use Thunder\Serializard\NormalizerContainer\FallbackNormalizerContainer;
+use Thunder\Serializard\NormalizerContext\NormalizerContextInterface;
 use Thunder\Serializard\Serializard;
+use Thunder\Serializard\Tests\Fake\FakeArticle;
 use Thunder\Serializard\Tests\Fake\FakeTag;
 use Thunder\Serializard\Tests\Fake\FakeUser;
 use Thunder\Serializard\Tests\Fake\FakeUserParent;
@@ -25,9 +27,6 @@ use Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface;
 final class SerializardTest extends AbstractTestCase
 {
     /**
-     * @param string $prefix
-     * @param callable $factory
-     *
      * @dataProvider provideExamples
      */
     public function testSerializard($prefix, $factory)
@@ -188,6 +187,37 @@ final class SerializardTest extends AbstractTestCase
 
         $normalizers->add($userClass, 'user', function(FakeUser $user) { return 'user'; });
         $this->assertSame('user', $serializard->serialize($user, 'array'));
+    }
+
+    public function testContext()
+    {
+        $userClass = 'Thunder\Serializard\Tests\Fake\FakeUser';
+        $articleClass = 'Thunder\Serializard\Tests\Fake\FakeArticle';
+        $tagClass = 'Thunder\Serializard\Tests\Fake\FakeTag';
+
+        $formats = new FormatContainer();
+        $formats->add('format', new ArrayFormat());
+
+        $hydrators = new FallbackHydratorContainer();
+        $normalizers = new FallbackNormalizerContainer();
+        $normalizers->add($articleClass, 'article', function(FakeArticle $article) {
+            return $article->getTag();
+        });
+        $normalizers->add($userClass, 'user', function(FakeUser $user) {
+            return $user->getTag();
+        });
+        $normalizers->add($tagClass, 'tag', function(FakeTag $tag, NormalizerContextInterface $context) {
+            return get_class($context->getParent());
+        });
+
+        $serializard = new Serializard($formats, $normalizers, $hydrators);
+
+        $tag = new FakeTag(1, 'name');
+        $user = new FakeUser(1, 'name', $tag);
+        $article = new FakeArticle(1, 'title', $user, $tag);
+
+        $this->assertSame($userClass, $serializard->serialize($user, 'format'));
+        $this->assertSame($articleClass, $serializard->serialize($article, 'format'));
     }
 
     public function testInvalidSerializationFormat()

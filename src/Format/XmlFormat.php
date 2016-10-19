@@ -3,30 +3,31 @@ namespace Thunder\Serializard\Format;
 
 use Thunder\Serializard\NormalizerContainer\NormalizerContainerInterface as Normalizers;
 use Thunder\Serializard\HydratorContainer\HydratorContainerInterface as Hydrators;
+use Thunder\Serializard\NormalizerContext\NormalizerContextInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 final class XmlFormat implements FormatInterface
 {
-    public function serialize($var, Normalizers $normalizers)
+    public function serialize($var, Normalizers $normalizers, NormalizerContextInterface $context)
     {
-        return $this->doSerialize($var, $normalizers);
+        return $this->doSerialize($var, $normalizers, $context);
     }
 
-    private function doSerialize($var, Normalizers $normalizers, $doc = null, $parent = null, $key = null, array $state = array(), array $classes = array())
+    private function doSerialize($var, Normalizers $normalizers, NormalizerContextInterface $context, $doc = null, $parent = null, $key = null, array $state = array(), array $classes = array())
     {
         $isRoot = ($doc === null);
         $doc = $doc ?: new \DOMDocument('1.0', 'utf-8');
         $doc->formatOutput = true;
         $parent = $parent ?: $doc;
 
-        $this->serializeValue($var, $normalizers, $doc, $parent, $key, $state, $classes);
+        $this->serializeValue($var, $normalizers, $context, $doc, $parent, $key, $state, $classes);
 
         return $isRoot ? $doc->saveXML() : null;
     }
 
-    private function serializeValue($var, Normalizers $normalizers, $doc, $parent, $key, array $state = array(), array $classes = array())
+    private function serializeValue($var, Normalizers $normalizers, NormalizerContextInterface $context, $doc, $parent, $key, array $state = array(), array $classes = array())
     {
         /** @var \DOMDocument|\DOMElement $doc */
         /** @var \DOMDocument|\DOMElement $parent */
@@ -41,7 +42,7 @@ final class XmlFormat implements FormatInterface
             }
             $state[$hash] = 1;
 
-            $this->doSerialize($arr, $normalizers, $doc, $parent, $normalizers->getRoot(get_class($var)), $state, $classes);
+            $this->doSerialize($arr, $normalizers, $context->withParent($var), $doc, $parent, $normalizers->getRoot(get_class($var)), $state, $classes);
 
             return;
         }
@@ -49,7 +50,7 @@ final class XmlFormat implements FormatInterface
         if(is_array($var)) {
             $item = $key ? $doc->createElement($key) : $parent;
             foreach($var as $index => $value) {
-                $this->doSerialize($value, $normalizers, $doc, $item, $index, $state, $classes);
+                $this->doSerialize($value, $normalizers, $context, $doc, $item, $index, $state, $classes);
             }
             !$key ?: $parent->appendChild($item);
 

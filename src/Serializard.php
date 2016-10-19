@@ -5,6 +5,7 @@ use Thunder\Serializard\Format\FormatInterface;
 use Thunder\Serializard\FormatContainer\FormatContainerInterface as Formats;
 use Thunder\Serializard\HydratorContainer\HydratorContainerInterface as Hydrators;
 use Thunder\Serializard\NormalizerContainer\NormalizerContainerInterface as Normalizers;
+use Thunder\Serializard\NormalizerContext\ParentNormalizerContext;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -25,7 +26,7 @@ final class Serializard
 
     public function serialize($var, $format)
     {
-        return $this->getFormat($format)->serialize($var, $this->normalizers);
+        return $this->getFormat($format)->serialize($var, $this->normalizers, new ParentNormalizerContext());
     }
 
     public function unserialize($var, $class, $format)

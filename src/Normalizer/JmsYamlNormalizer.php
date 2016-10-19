@@ -23,6 +23,7 @@ final class JmsYamlNormalizer
             throw new \RuntimeException(sprintf('Failed to read file at path %s!', $this->path));
         }
 
+        // FIXME: Cache parsed config within normalizer instance
         $yaml = Yaml::parse($data);
         $keys = array_keys($yaml);
         $yaml = $yaml[$keys[0]];

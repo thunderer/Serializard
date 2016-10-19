@@ -9,6 +9,7 @@ use Thunder\Serializard\Format\YamlFormat;
 use Thunder\Serializard\FormatContainer\FormatContainer;
 use Thunder\Serializard\HydratorContainer\FallbackHydratorContainer;
 use Thunder\Serializard\NormalizerContainer\FallbackNormalizerContainer;
+use Thunder\Serializard\NormalizerContext\ParentNormalizerContext;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -52,7 +53,7 @@ final class SerializardFacade
 
     public function serialize($var, $format)
     {
-        return $this->getFormat($format)->serialize($var, $this->normalizers);
+        return $this->getFormat($format)->serialize($var, $this->normalizers, new ParentNormalizerContext());
     }
 
     public function unserialize($var, $class, $format)

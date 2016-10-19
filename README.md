@@ -34,7 +34,6 @@ class User
 }
 ```
 
-
 ## Serialization
 
 Serialization is controlled by registering callables used in normalization phase:
@@ -68,7 +67,6 @@ The result is:
 ```
 {"id":1,"name":"Thomas"}
 ```
-
 
 ## Unserialization
 
