@@ -7,7 +7,7 @@ use Thunder\Serializard\NormalizerContainer\NormalizerContainerInterface as Norm
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class ArrayFormat extends AbstractFormat implements FormatInterface
+final class ArrayFormat extends AbstractFormat
 {
     public function serialize($var, Normalizers $normalizers)
     {

@@ -10,9 +10,9 @@ final class FormatContainer implements FormatContainerInterface
 {
     private $formats = array();
 
-    public function add($class, FormatInterface $handler)
+    public function add($alias, FormatInterface $handler)
     {
-        $this->formats[$class] = $handler;
+        $this->formats[$alias] = $handler;
     }
 
     public function get($alias)

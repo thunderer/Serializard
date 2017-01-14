@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Serializard\Tests;
 
+use Thunder\Serializard\Normalizer\GetObjectVarsNormalizer;
 use Thunder\Serializard\Normalizer\ReflectionNormalizer;
 use Thunder\Serializard\Tests\Fake\Inheritance\FakeClass;
 use Thunder\Serializard\Tests\Fake\FakeTag;
@@ -28,5 +29,18 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase
             'parentProperty' => 'parent',
             'parentParentProperty' => 'parentParent',
         ), $normalizer(new FakeClass('parentParent', 'parent', 'property')));
+    }
+
+    public function testGetObjectVarsNormalizer()
+    {
+        $normalizer = new GetObjectVarsNormalizer();
+
+        $this->assertSame(array(
+            'public' => 'public',
+        ), $normalizer(new class {
+            public $public = 'public';
+            protected $protected = 'protected';
+            private $private = 'private';
+        }));
     }
 }

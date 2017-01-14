@@ -7,7 +7,7 @@ use Thunder\Serializard\HydratorContainer\HydratorContainerInterface as Hydrator
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class JsonFormat extends AbstractFormat implements FormatInterface
+final class JsonFormat extends AbstractFormat
 {
     public function serialize($var, Normalizers $normalizers)
     {

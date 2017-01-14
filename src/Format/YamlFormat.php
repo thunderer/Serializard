@@ -8,7 +8,7 @@ use Thunder\Serializard\HydratorContainer\HydratorContainerInterface as Hydrator
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class YamlFormat extends AbstractFormat implements FormatInterface
+final class YamlFormat extends AbstractFormat
 {
     public function serialize($var, Normalizers $normalizers)
     {

@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "php": ">=5.3",
+        "php": "^5.3|^7.0",
         "symfony/yaml": "^2.3|^3.0"
     },
     "require-dev": {
