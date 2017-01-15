@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Serializard\Tests;
 
+use Thunder\Serializard\Normalizer\CallbackNormalizer;
 use Thunder\Serializard\Normalizer\GetObjectVarsNormalizer;
 use Thunder\Serializard\Normalizer\ReflectionNormalizer;
 use Thunder\Serializard\Tests\Fake\Inheritance\FakeClass;
@@ -39,5 +40,22 @@ final class NormalizerTest extends AbstractTestCase
         $this->assertSame(array(
             'public' => 'public',
         ), $normalizer(new PropertyVisibility()));
+    }
+
+    public function testCallbackNormalizer()
+    {
+        $normalizer = new CallbackNormalizer(function(PropertyVisibility $pv) {
+            return array('public' => $pv->public);
+        });
+
+        $this->assertSame(array(
+            'public' => 'public',
+        ), $normalizer(new PropertyVisibility()));
+    }
+
+    public function testCallbackNormalizerInvalidCallback()
+    {
+        $this->expectException('InvalidArgumentException');
+        new CallbackNormalizer('invalid');
     }
 }

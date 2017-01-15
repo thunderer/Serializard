@@ -14,8 +14,8 @@ final class NormalizerContainerTest extends AbstractTestCase
         $normalizers->add('stdClass', 'std', function() { return 'value'; });
         $normalizers->addAlias('DateTime', 'stdClass');
 
-        $this->assertSame('value', call_user_func_array($normalizers->getHandler('stdClass'), array()));
-        $this->assertSame('value', call_user_func_array($normalizers->getHandler('DateTime'), array()));
+        $this->assertSame('value', call_user_func($normalizers->getHandler('stdClass')));
+        $this->assertSame('value', call_user_func($normalizers->getHandler('DateTime')));
     }
 
     public function testInterface()
@@ -26,8 +26,8 @@ final class NormalizerContainerTest extends AbstractTestCase
         $interfaceTypeB = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeB';
         $normalizers->add($interfaceName, 'type', function() { return 'type'; });
 
-        $this->assertSame('type', call_user_func_array($normalizers->getHandler($interfaceTypeA), array()));
-        $this->assertSame('type', call_user_func_array($normalizers->getHandler($interfaceTypeB), array()));
+        $this->assertSame('type', call_user_func($normalizers->getHandler($interfaceTypeA)));
+        $this->assertSame('type', call_user_func($normalizers->getHandler($interfaceTypeB)));
     }
 
     public function testInheritance()
@@ -38,9 +38,9 @@ final class NormalizerContainerTest extends AbstractTestCase
         $userName = 'Thunder\Serializard\Tests\Fake\FakeUser';
         $normalizers->add($ancestorName, 'type', function() { return 'ancestor'; });
 
-        $this->assertSame('ancestor', call_user_func_array($normalizers->getHandler($ancestorName), array()));
-        $this->assertSame('ancestor', call_user_func_array($normalizers->getHandler($parentName), array()));
-        $this->assertSame('ancestor', call_user_func_array($normalizers->getHandler($userName), array()));
+        $this->assertSame('ancestor', call_user_func($normalizers->getHandler($ancestorName)));
+        $this->assertSame('ancestor', call_user_func($normalizers->getHandler($parentName)));
+        $this->assertSame('ancestor', call_user_func($normalizers->getHandler($userName)));
     }
 
     public function testMultipleInterfacesException()

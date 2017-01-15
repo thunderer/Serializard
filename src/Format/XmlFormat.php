@@ -15,7 +15,7 @@ final class XmlFormat implements FormatInterface
         return $this->doSerialize($var, $normalizers, $context);
     }
 
-    private function doSerialize($var, Normalizers $normalizers, NormalizerContextInterface $context, $doc = null, $parent = null, $key = null, array $state = array(), array $classes = array())
+    private function doSerialize($var, Normalizers $normalizers, NormalizerContextInterface $context, \DOMNode $doc = null, $parent = null, $key = null, array $state = array(), array $classes = array())
     {
         $isRoot = ($doc === null);
         $doc = $doc ?: new \DOMDocument('1.0', 'utf-8');
@@ -27,7 +27,7 @@ final class XmlFormat implements FormatInterface
         return $isRoot ? $doc->saveXML() : null;
     }
 
-    private function serializeValue($var, Normalizers $normalizers, NormalizerContextInterface $context, $doc, $parent, $key, array $state = array(), array $classes = array())
+    private function serializeValue($var, Normalizers $normalizers, NormalizerContextInterface $context, \DOMNode $doc, $parent, $key, array $state = array(), array $classes = array())
     {
         /** @var \DOMDocument|\DOMElement $doc */
         /** @var \DOMDocument|\DOMElement $parent */
@@ -91,7 +91,7 @@ final class XmlFormat implements FormatInterface
                 $ret[] = $result;
                 continue;
             }
-            if(in_array($node->tagName, $tags)) {
+            if(in_array($node->tagName, $tags, true)) {
                 $ret[] = $result;
                 continue;
             }

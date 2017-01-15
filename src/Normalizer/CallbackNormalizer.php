@@ -19,6 +19,6 @@ final class CallbackNormalizer
 
     public function __invoke($var)
     {
-        return call_user_func_array($this->callback, array($var));
+        return call_user_func($this->callback, $var);
     }
 }

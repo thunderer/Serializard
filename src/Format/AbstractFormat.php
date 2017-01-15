@@ -27,7 +27,7 @@ abstract class AbstractFormat implements FormatInterface
             }
             $state[$hash] = 1;
 
-            return $this->doSerialize(call_user_func_array($handler, array($var, $context)), $handlers, $context->withParent($var), $state, $classes);
+            return $this->doSerialize($handler($var, $context), $handlers, $context->withParent($var), $state, $classes);
         }
 
         if(is_array($var)) {
@@ -51,6 +51,6 @@ abstract class AbstractFormat implements FormatInterface
             throw new \RuntimeException(sprintf('No unserialization handler for class %s!', $class));
         }
 
-        return call_user_func_array($handler, array($var, $hydrators));
+        return $handler($var, $hydrators);
     }
 }
