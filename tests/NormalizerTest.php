@@ -6,6 +6,7 @@ use Thunder\Serializard\Normalizer\ReflectionNormalizer;
 use Thunder\Serializard\Tests\Fake\Inheritance\FakeClass;
 use Thunder\Serializard\Tests\Fake\FakeTag;
 use Thunder\Serializard\Tests\Fake\FakeUser;
+use Thunder\Serializard\Tests\Fake\PropertyVisibility;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -37,10 +38,6 @@ class NormalizerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(array(
             'public' => 'public',
-        ), $normalizer(new class {
-            public $public = 'public';
-            protected $protected = 'protected';
-            private $private = 'private';
-        }));
+        ), $normalizer(new PropertyVisibility()));
     }
 }
