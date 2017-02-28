@@ -6,7 +6,7 @@ use Thunder\Serializard\NormalizerContainer\FallbackNormalizerContainer;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-class NormalizerContainerTest extends \PHPUnit_Framework_TestCase
+final class NormalizerContainerTest extends AbstractTestCase
 {
     public function testAlias()
     {
@@ -53,28 +53,28 @@ class NormalizerContainerTest extends \PHPUnit_Framework_TestCase
         $normalizers->add($typeInterface, 'type', function() { return 'multiple'; });
         $normalizers->add($typeAnother, 'type', function() { return 'multiple'; });
 
-        $this->setExpectedException('RuntimeException');
+        $this->expectException('RuntimeException');
         $normalizers->getHandler($typeMultiple);
     }
 
     public function testInvalidClassOrInterfaceName()
     {
         $normalizers = new FallbackNormalizerContainer();
-        $this->setExpectedException('RuntimeException');
+        $this->expectException('RuntimeException');
         $normalizers->add('invalid', 'root', function() {});
     }
 
     public function testAliasForInvalidClass()
     {
         $normalizers = new FallbackNormalizerContainer();
-        $this->setExpectedException('RuntimeException');
+        $this->expectException('RuntimeException');
         $normalizers->addAlias('stdClass', 'DateTime');
     }
 
     public function testInvalidHandler()
     {
         $normalizers = new FallbackNormalizerContainer();
-        $this->setExpectedException('RuntimeException');
+        $this->expectException('RuntimeException');
         $normalizers->add('stdClass', 'name', 'invalid');
     }
 }
