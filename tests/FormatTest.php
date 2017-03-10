@@ -2,6 +2,7 @@
 namespace Thunder\Serializard\Tests;
 
 use Thunder\Serializard\Format\ArrayFormat;
+use Thunder\Serializard\Format\JsonFormat;
 use Thunder\Serializard\HydratorContainer\FallbackHydratorContainer;
 use Thunder\Serializard\NormalizerContainer\FallbackNormalizerContainer;
 
@@ -22,5 +23,12 @@ class FormatTest extends \PHPUnit_Framework_TestCase
         $format = new ArrayFormat();
         $this->setExpectedException('RuntimeException');
         $format->unserialize(array(), 'stdClass', new FallbackHydratorContainer());
+    }
+
+    public function testJsonEncodeSerializationFailureException()
+    {
+        $format = new JsonFormat();
+        $this->setExpectedException('RuntimeException'); // Inf and NaN cannot be JSON encoded
+        $this->assertSame(INF, $format->serialize(INF, new FallbackNormalizerContainer()));
     }
 }
