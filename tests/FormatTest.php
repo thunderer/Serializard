@@ -29,6 +29,6 @@ class FormatTest extends \PHPUnit_Framework_TestCase
     {
         $format = new JsonFormat();
         $this->setExpectedException('RuntimeException'); // Inf and NaN cannot be JSON encoded
-        $this->assertSame(INF, $format->serialize(INF, new FallbackNormalizerContainer()));
+        $format->serialize(INF, new FallbackNormalizerContainer()); // INF is returned as zero on PHP <=5.4
     }
 }
