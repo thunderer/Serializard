@@ -13,12 +13,8 @@ final class XmlFormat implements FormatInterface
     /** @var callable */
     private $rootProvider;
 
-    public function __construct($rootProvider = null)
+    public function __construct(callable $rootProvider)
     {
-        if($rootProvider && false === is_callable($rootProvider)) {
-            throw new \InvalidArgumentException('XML format root element name provider must be callable!');
-        }
-
         $this->rootProvider = $rootProvider;
     }
 
@@ -115,10 +111,6 @@ final class XmlFormat implements FormatInterface
 
     private function getRoot($class)
     {
-        if(null === $this->rootProvider) {
-            throw new \RuntimeException('No root provider!');
-        }
-
         return call_user_func($this->rootProvider, $class);
     }
 }

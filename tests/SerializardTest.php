@@ -23,6 +23,7 @@ use Thunder\Serializard\Tests\Fake\FakeUserParentParent;
 use Thunder\Serializard\Tests\Fake\Interfaces\TypeA;
 use Thunder\Serializard\Tests\Fake\Interfaces\TypeB;
 use Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface;
+use Thunder\Serializard\Utility\RootElementProviderUtility;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -105,7 +106,10 @@ final class SerializardTest extends AbstractTestCase
         $hydrators = new FallbackHydratorContainer();
 
         $formats = new FormatContainer();
-        $formats->add('xml', new XmlFormat());
+        $formats->add('xml', new XmlFormat(new RootElementProviderUtility([
+            FakeUser::class => 'user',
+            FakeTag::class => 'tag',
+        ])));
         $formats->add('yaml', new YamlFormat());
         $formats->add('json', new JsonFormat());
         $formats->add('array', new ArrayFormat());
@@ -161,18 +165,10 @@ final class SerializardTest extends AbstractTestCase
         });
 
         $formats = new FormatContainer();
-        $formats->add('xml', new XmlFormat(function($class) {
-            static $aliases = [
-                FakeUser::class => 'user',
-                FakeTag::class => 'tag',
-            ];
-
-            if(false === array_key_exists($class, $aliases)) {
-                throw new \RuntimeException(sprintf('No tag name for class %s!', $class));
-            }
-
-            return $aliases[$class];
-        }));
+        $formats->add('xml', new XmlFormat(new RootElementProviderUtility([
+            FakeUser::class => 'user',
+            FakeTag::class => 'tag',
+        ])));
         $formats->add('yaml', new YamlFormat());
         $formats->add('json', new JsonFormat());
         $formats->add('array', new ArrayFormat());
