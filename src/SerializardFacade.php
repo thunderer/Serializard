@@ -41,14 +41,14 @@ final class SerializardFacade
         $this->formats->add($alias, $format);
     }
 
-    public function addNormalizer($class, $root, $handler)
+    public function addNormalizer($class, $handler)
     {
-        $this->normalizers->add($class, $root, $handler);
+        $this->normalizers->add($class, $handler);
     }
 
-    public function addHydrator($class, $root, $handler)
+    public function addHydrator($class, $handler)
     {
-        $this->hydrators->add($class, $root, $handler);
+        $this->hydrators->add($class, $handler);
     }
 
     public function serialize($var, $format)
