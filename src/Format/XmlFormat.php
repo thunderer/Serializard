@@ -10,6 +10,14 @@ use Thunder\Serializard\NormalizerContext\NormalizerContextInterface;
  */
 final class XmlFormat implements FormatInterface
 {
+    /** @var callable */
+    private $rootProvider;
+
+    public function __construct(callable $rootProvider)
+    {
+        $this->rootProvider = $rootProvider;
+    }
+
     public function serialize($var, Normalizers $normalizers, NormalizerContextInterface $context)
     {
         return $this->doSerialize($var, $normalizers, $context);
@@ -42,7 +50,7 @@ final class XmlFormat implements FormatInterface
             }
             $state[$hash] = 1;
 
-            $this->doSerialize($arr, $normalizers, $context->withParent($var), $doc, $parent, $normalizers->getRoot(get_class($var)), $state, $classes);
+            $this->doSerialize($arr, $normalizers, $context->withParent($var), $doc, $parent, $this->getRoot(get_class($var)), $state, $classes);
 
             return;
         }
@@ -67,7 +75,7 @@ final class XmlFormat implements FormatInterface
         $data = $this->parse($doc, $doc);
         $hydrator = $hydrators->getHandler($class);
 
-        return $hydrator($data[$hydrators->getRoot($class)], $hydrators);
+        return $hydrator($data[$this->getRoot($class)], $hydrators);
     }
 
     private function parse(\DOMDocument $doc, $parent = null)
@@ -99,5 +107,10 @@ final class XmlFormat implements FormatInterface
         }
 
         return $ret;
+    }
+
+    private function getRoot($class)
+    {
+        return call_user_func($this->rootProvider, $class);
     }
 }

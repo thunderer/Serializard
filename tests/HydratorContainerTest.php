@@ -11,7 +11,7 @@ final class HydratorContainerTest extends AbstractTestCase
     public function testAlias()
     {
         $handlers = new FallbackHydratorContainer();
-        $handlers->add('stdClass', 'std', function() { return 'value'; });
+        $handlers->add('stdClass', function() { return 'value'; });
         $handlers->addAlias('DateTime', 'stdClass');
 
         $this->assertSame('value', call_user_func($handlers->getHandler('stdClass')));
@@ -24,7 +24,7 @@ final class HydratorContainerTest extends AbstractTestCase
         $interfaceName = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface';
         $interfaceTypeA = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeA';
         $interfaceTypeB = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeB';
-        $hydrators->add($interfaceName, 'type', function() { return 'type'; });
+        $hydrators->add($interfaceName, function() { return 'type'; });
 
         $this->assertSame('type', call_user_func($hydrators->getHandler($interfaceTypeA)));
         $this->assertSame('type', call_user_func($hydrators->getHandler($interfaceTypeB)));
@@ -36,7 +36,7 @@ final class HydratorContainerTest extends AbstractTestCase
         $ancestorName = 'Thunder\Serializard\Tests\Fake\FakeUserParentParent';
         $parentName = 'Thunder\Serializard\Tests\Fake\FakeUserParent';
         $userName = 'Thunder\Serializard\Tests\Fake\FakeUser';
-        $hydrators->add($ancestorName, 'type', function() { return 'ancestor'; });
+        $hydrators->add($ancestorName, function() { return 'ancestor'; });
 
         $this->assertSame('ancestor', call_user_func($hydrators->getHandler($ancestorName)));
         $this->assertSame('ancestor', call_user_func($hydrators->getHandler($parentName)));
@@ -50,8 +50,8 @@ final class HydratorContainerTest extends AbstractTestCase
         $typeMultiple = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeMultiple';
 
         $hydrators = new FallbackHydratorContainer();
-        $hydrators->add($typeInterface, 'type', function() { return 'multiple'; });
-        $hydrators->add($typeAnother, 'type', function() { return 'multiple'; });
+        $hydrators->add($typeInterface, function() { return 'multiple'; });
+        $hydrators->add($typeAnother, function() { return 'multiple'; });
 
         $this->expectException('RuntimeException');
         $hydrators->getHandler($typeMultiple);
@@ -61,7 +61,7 @@ final class HydratorContainerTest extends AbstractTestCase
     {
         $handlers = new FallbackHydratorContainer();
         $this->expectException('RuntimeException');
-        $handlers->add('invalid', 'root', function() {});
+        $handlers->add('invalid', function() {});
     }
 
     public function testAliasForInvalidClass()
@@ -75,6 +75,6 @@ final class HydratorContainerTest extends AbstractTestCase
     {
         $handlers = new FallbackHydratorContainer();
         $this->expectException('RuntimeException');
-        $handlers->add('stdClass', 'name', 'invalid');
+        $handlers->add('stdClass', 'invalid');
     }
 }

@@ -10,6 +10,7 @@ use Thunder\Serializard\FormatContainer\FormatContainer;
 use Thunder\Serializard\HydratorContainer\FallbackHydratorContainer;
 use Thunder\Serializard\NormalizerContainer\FallbackNormalizerContainer;
 use Thunder\Serializard\NormalizerContext\ParentNormalizerContext;
+use Thunder\Serializard\Utility\RootElementProviderUtility;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -32,7 +33,7 @@ final class SerializardFacade
         $formats->add('json', new JsonFormat());
         $formats->add('array', new ArrayFormat());
         $formats->add('yaml', new YamlFormat());
-        $formats->add('xml', new XmlFormat());
+        $formats->add('xml', new XmlFormat(new RootElementProviderUtility([])));
         $this->formats = $formats;
     }
 
@@ -41,14 +42,14 @@ final class SerializardFacade
         $this->formats->add($alias, $format);
     }
 
-    public function addNormalizer($class, $root, $handler)
+    public function addNormalizer($class, $handler)
     {
-        $this->normalizers->add($class, $root, $handler);
+        $this->normalizers->add($class, $handler);
     }
 
-    public function addHydrator($class, $root, $handler)
+    public function addHydrator($class, $handler)
     {
-        $this->hydrators->add($class, $root, $handler);
+        $this->hydrators->add($class, $handler);
     }
 
     public function serialize($var, $format)

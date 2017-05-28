@@ -49,7 +49,7 @@ $formats = new FormatContainer();
 $formats->add('json', new JsonFormat());
 
 $normalizers = new FallbackNormalizerContainer();
-$normalizers->add(User::class, 'user', function(User $user) {
+$normalizers->add(User::class, function(User $user) {
     return [
         'id' => $user->getId(),
         'name' => $user->getName(),
@@ -85,7 +85,7 @@ $formats->add('json', new JsonFormat());
 $normalizers = new FallbackNormalizerContainer();
 
 $hydrators = new FallbackHydratorContainer();
-$hydrators->add(User::class, 'user', function(array $data) {
+$hydrators->add(User::class, function(array $data) {
     return new User($data['id'], $data['name']);
 });
 
@@ -111,8 +111,8 @@ Several formats are supported as classes in `Thunder\Serializard\Format`:
 
 - **JSON** in `JsonFormat` converts objects to JSON,
 - **Array** in `ArrayFormat` just returns object graph normalized to arrays of scalars,
-- **YAML** in `YamlFormat` converts objects to YAML,
-- **XML** in `XmlFormat` converts objects to XML.
+- **YAML** in `YamlFormat` converts objects to YAML (uses `symfony/yaml`),
+- **XML** in `XmlFormat` converts objects to XML (uses `ext-dom`).
 
 # License
 

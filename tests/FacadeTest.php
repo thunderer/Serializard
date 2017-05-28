@@ -20,8 +20,8 @@ final class FacadeTest extends AbstractTestCase
 
         $facade = new SerializardFacade();
         $facade->addFormat('thunder', new JsonFormat());
-        $facade->addNormalizer($userClass, 'user', new ReflectionNormalizer(array('tag', 'tags')));
-        $facade->addHydrator($userClass, 'user', function(array $data) {
+        $facade->addNormalizer($userClass, new ReflectionNormalizer(array('tag', 'tags')));
+        $facade->addHydrator($userClass, function(array $data) {
             return new FakeUser($data['id'], $data['name'], new FakeTag(1, 'name'));
         });
 

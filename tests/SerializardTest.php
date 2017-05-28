@@ -13,7 +13,6 @@ use Thunder\Serializard\HydratorContainer\HydratorContainerInterface;
 use Thunder\Serializard\Normalizer\ReflectionNormalizer;
 use Thunder\Serializard\NormalizerContainer\FallbackNormalizerContainer;
 use Thunder\Serializard\NormalizerContext\NormalizerContextInterface;
-use Thunder\Serializard\NormalizerContext\ParentNormalizerContext;
 use Thunder\Serializard\Serializard;
 use Thunder\Serializard\Tests\Fake\Context\FakeNormalizerContext;
 use Thunder\Serializard\Tests\Fake\FakeArticle;
@@ -24,6 +23,7 @@ use Thunder\Serializard\Tests\Fake\FakeUserParentParent;
 use Thunder\Serializard\Tests\Fake\Interfaces\TypeA;
 use Thunder\Serializard\Tests\Fake\Interfaces\TypeB;
 use Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface;
+use Thunder\Serializard\Utility\RootElementProviderUtility;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -75,7 +75,7 @@ final class SerializardTest extends AbstractTestCase
     {
         $interface = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface';
         $normalizers = new FallbackNormalizerContainer();
-        $normalizers->add($interface, 'type', function(TypeInterface $type) {
+        $normalizers->add($interface, function(TypeInterface $type) {
             return array(
                 'type' => $type->getType(),
                 'value' => $type->getValue(),
@@ -100,13 +100,16 @@ final class SerializardTest extends AbstractTestCase
         $tagClass = 'Thunder\Serializard\Tests\Fake\FakeTag';
 
         $normalizers = new FallbackNormalizerContainer();
-        $normalizers->add($userClass, 'user', new ReflectionNormalizer());
-        $normalizers->add($tagClass, 'tag', new ReflectionNormalizer());
+        $normalizers->add($userClass, new ReflectionNormalizer());
+        $normalizers->add($tagClass, new ReflectionNormalizer());
 
         $hydrators = new FallbackHydratorContainer();
 
         $formats = new FormatContainer();
-        $formats->add('xml', new XmlFormat());
+        $formats->add('xml', new XmlFormat(new RootElementProviderUtility([
+            FakeUser::class => 'user',
+            FakeTag::class => 'tag',
+        ])));
         $formats->add('yaml', new YamlFormat());
         $formats->add('json', new JsonFormat());
         $formats->add('array', new ArrayFormat());
@@ -138,8 +141,8 @@ final class SerializardTest extends AbstractTestCase
         $tagClass = 'Thunder\Serializard\Tests\Fake\FakeTag';
 
         $normalizers = new FallbackNormalizerContainer();
-        $normalizers->add($userClass, 'user', new ReflectionNormalizer());
-        $normalizers->add($tagClass, 'tag', function(FakeTag $tag) {
+        $normalizers->add($userClass, new ReflectionNormalizer());
+        $normalizers->add($tagClass, function(FakeTag $tag) {
             return array(
                 'id' => $tag->getId(),
                 'name' => $tag->getName(),
@@ -147,7 +150,7 @@ final class SerializardTest extends AbstractTestCase
         });
 
         $hydrators = new FallbackHydratorContainer();
-        $hydrators->add($userClass, 'user', function(array $data, Hydrators $handlers) use($tagClass) {
+        $hydrators->add($userClass, function(array $data, Hydrators $handlers) use($tagClass) {
             $tagHandler = $handlers->getHandler($tagClass);
 
             $user = new FakeUser($data['id'], $data['name'], $tagHandler($data['tag'], $handlers));
@@ -157,12 +160,15 @@ final class SerializardTest extends AbstractTestCase
 
             return $user;
         });
-        $hydrators->add($tagClass, 'tag', function(array $data, Hydrators $handlers) {
+        $hydrators->add($tagClass, function(array $data, Hydrators $handlers) {
             return new FakeTag($data['id'], $data['name']);
         });
 
         $formats = new FormatContainer();
-        $formats->add('xml', new XmlFormat());
+        $formats->add('xml', new XmlFormat(new RootElementProviderUtility([
+            FakeUser::class => 'user',
+            FakeTag::class => 'tag',
+        ])));
         $formats->add('yaml', new YamlFormat());
         $formats->add('json', new JsonFormat());
         $formats->add('array', new ArrayFormat());
@@ -181,13 +187,13 @@ final class SerializardTest extends AbstractTestCase
         $hydrators = new FallbackHydratorContainer();
         $serializard = new Serializard($formats, $normalizers, $hydrators);
 
-        $normalizers->add($userClass.'ParentParent', 'user', function(FakeUserParentParent $user) { return 'ancestor'; });
+        $normalizers->add($userClass.'ParentParent', function(FakeUserParentParent $user) { return 'ancestor'; });
         $this->assertSame('ancestor', $serializard->serialize($user, 'array'));
 
-        $normalizers->add($userClass.'Parent', 'user', function(FakeUserParent $user) { return 'parent'; });
+        $normalizers->add($userClass.'Parent', function(FakeUserParent $user) { return 'parent'; });
         $this->assertSame('parent', $serializard->serialize($user, 'array'));
 
-        $normalizers->add($userClass, 'user', function(FakeUser $user) { return 'user'; });
+        $normalizers->add($userClass, function(FakeUser $user) { return 'user'; });
         $this->assertSame('user', $serializard->serialize($user, 'array'));
     }
 
@@ -202,13 +208,13 @@ final class SerializardTest extends AbstractTestCase
 
         $hydrators = new FallbackHydratorContainer();
         $normalizers = new FallbackNormalizerContainer();
-        $normalizers->add($articleClass, 'article', function(FakeArticle $article) {
+        $normalizers->add($articleClass, function(FakeArticle $article) {
             return $article->getTag();
         });
-        $normalizers->add($userClass, 'user', function(FakeUser $user) {
+        $normalizers->add($userClass, function(FakeUser $user) {
             return $user->getTag();
         });
-        $normalizers->add($tagClass, 'tag', function(FakeTag $tag, NormalizerContextInterface $context) {
+        $normalizers->add($tagClass, function(FakeTag $tag, NormalizerContextInterface $context) {
             return get_class($context->getParent());
         });
 
@@ -234,13 +240,13 @@ final class SerializardTest extends AbstractTestCase
         $formats->add('json', new JsonFormat());
 
         $hydrators = new FallbackHydratorContainer();
-        $hydrators->add($articleClass, 'article', function(array $data, HydratorContainerInterface $hydrators) use($tagClass, $userClass) {
+        $hydrators->add($articleClass, function(array $data, HydratorContainerInterface $hydrators) use($tagClass, $userClass) {
             $user = call_user_func($hydrators->getHandler($userClass), $data['user'], $hydrators);
             $tag = call_user_func($hydrators->getHandler($tagClass), $data['tag'], $hydrators);
 
             return new FakeArticle($data['id'], $data['title'], $user, $tag);
         });
-        $hydrators->add($userClass, 'user', function(array $data, HydratorContainerInterface $hydrators) use($tagClass) {
+        $hydrators->add($userClass, function(array $data, HydratorContainerInterface $hydrators) use($tagClass) {
             $tag = call_user_func($hydrators->getHandler($tagClass), $data['tag'], $hydrators);
 
             $user = new FakeUser($data['id'], $data['name'], $tag);
@@ -250,12 +256,12 @@ final class SerializardTest extends AbstractTestCase
 
             return $user;
         });
-        $hydrators->add($tagClass, 'tag', function(array $data, HydratorContainerInterface $hydrators) {
+        $hydrators->add($tagClass, function(array $data, HydratorContainerInterface $hydrators) {
             return new FakeTag($data['id'], $data['name']);
         });
 
         $normalizers = new FallbackNormalizerContainer();
-        $normalizers->add($articleClass, 'article', function(FakeArticle $article, NormalizerContextInterface $context) {
+        $normalizers->add($articleClass, function(FakeArticle $article, NormalizerContextInterface $context) {
             return array(
                 'id' => $article->getId(),
                 'title' => $article->getTitle(),
@@ -263,7 +269,7 @@ final class SerializardTest extends AbstractTestCase
                 'tag' => $article->getTag(),
             );
         });
-        $normalizers->add($userClass, 'user', function(FakeUser $user, NormalizerContextInterface $context) {
+        $normalizers->add($userClass, function(FakeUser $user, NormalizerContextInterface $context) {
             return array(
                 'id' => $user->getId(),
                 'name' => $user->getName(),
@@ -271,7 +277,7 @@ final class SerializardTest extends AbstractTestCase
                 'tags' => $user->getTags(),
             );
         });
-        $normalizers->add($tagClass, 'tag', function(FakeTag $tag, NormalizerContextInterface $context) {
+        $normalizers->add($tagClass, function(FakeTag $tag, NormalizerContextInterface $context) {
             return array(
                 'id' => $tag->getId(),
                 'name' => $tag->getName(),
@@ -300,20 +306,20 @@ final class SerializardTest extends AbstractTestCase
         $formats->add('json', new JsonFormat());
 
         $hydrators = new FallbackHydratorContainer();
-        $hydrators->add($articleClass, 'article', new ReflectionHydrator($articleClass, array(
+        $hydrators->add($articleClass, new ReflectionHydrator($articleClass, array(
             'user' => $userClass,
             'tag' => $tagClass,
         )));
-        $hydrators->add($userClass, 'user', new ReflectionHydrator($userClass, array(
+        $hydrators->add($userClass, new ReflectionHydrator($userClass, array(
             'tag' => $tagClass,
             'tags' => $tagClass.'[]',
         )));
-        $hydrators->add($tagClass, 'tag', new ReflectionHydrator($tagClass, array()));
+        $hydrators->add($tagClass, new ReflectionHydrator($tagClass, array()));
 
         $normalizers = new FallbackNormalizerContainer();
-        $normalizers->add($articleClass, 'article', new ReflectionNormalizer());
-        $normalizers->add($userClass, 'user', new ReflectionNormalizer());
-        $normalizers->add($tagClass, 'tag', new ReflectionNormalizer(array('user')));
+        $normalizers->add($articleClass, new ReflectionNormalizer());
+        $normalizers->add($userClass, new ReflectionNormalizer());
+        $normalizers->add($tagClass, new ReflectionNormalizer(array('user')));
 
         $serializard = new Serializard($formats, $normalizers, $hydrators);
 

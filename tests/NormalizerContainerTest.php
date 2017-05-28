@@ -11,7 +11,7 @@ final class NormalizerContainerTest extends AbstractTestCase
     public function testAlias()
     {
         $normalizers = new FallbackNormalizerContainer();
-        $normalizers->add('stdClass', 'std', function() { return 'value'; });
+        $normalizers->add('stdClass', function() { return 'value'; });
         $normalizers->addAlias('DateTime', 'stdClass');
 
         $this->assertSame('value', call_user_func($normalizers->getHandler('stdClass')));
@@ -24,7 +24,7 @@ final class NormalizerContainerTest extends AbstractTestCase
         $interfaceName = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface';
         $interfaceTypeA = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeA';
         $interfaceTypeB = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeB';
-        $normalizers->add($interfaceName, 'type', function() { return 'type'; });
+        $normalizers->add($interfaceName, function() { return 'type'; });
 
         $this->assertSame('type', call_user_func($normalizers->getHandler($interfaceTypeA)));
         $this->assertSame('type', call_user_func($normalizers->getHandler($interfaceTypeB)));
@@ -36,7 +36,7 @@ final class NormalizerContainerTest extends AbstractTestCase
         $ancestorName = 'Thunder\Serializard\Tests\Fake\FakeUserParentParent';
         $parentName = 'Thunder\Serializard\Tests\Fake\FakeUserParent';
         $userName = 'Thunder\Serializard\Tests\Fake\FakeUser';
-        $normalizers->add($ancestorName, 'type', function() { return 'ancestor'; });
+        $normalizers->add($ancestorName, function() { return 'ancestor'; });
 
         $this->assertSame('ancestor', call_user_func($normalizers->getHandler($ancestorName)));
         $this->assertSame('ancestor', call_user_func($normalizers->getHandler($parentName)));
@@ -50,8 +50,8 @@ final class NormalizerContainerTest extends AbstractTestCase
         $typeMultiple = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeMultiple';
 
         $normalizers = new FallbackNormalizerContainer();
-        $normalizers->add($typeInterface, 'type', function() { return 'multiple'; });
-        $normalizers->add($typeAnother, 'type', function() { return 'multiple'; });
+        $normalizers->add($typeInterface, function() { return 'multiple'; });
+        $normalizers->add($typeAnother, function() { return 'multiple'; });
 
         $this->expectException('RuntimeException');
         $normalizers->getHandler($typeMultiple);
@@ -61,7 +61,7 @@ final class NormalizerContainerTest extends AbstractTestCase
     {
         $normalizers = new FallbackNormalizerContainer();
         $this->expectException('RuntimeException');
-        $normalizers->add('invalid', 'root', function() {});
+        $normalizers->add('invalid', function() {});
     }
 
     public function testAliasForInvalidClass()
@@ -75,6 +75,6 @@ final class NormalizerContainerTest extends AbstractTestCase
     {
         $normalizers = new FallbackNormalizerContainer();
         $this->expectException('RuntimeException');
-        $normalizers->add('stdClass', 'name', 'invalid');
+        $normalizers->add('stdClass', 'invalid');
     }
 }

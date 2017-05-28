@@ -10,17 +10,17 @@ final class FallbackNormalizerContainer implements NormalizerContainerInterface
     private $interfaces = array();
     private $aliases = array();
 
-    public function add($class, $root, $handler)
+    public function add($class, $handler)
     {
         if(false === is_callable($handler)) {
             throw new \RuntimeException(sprintf('Invalid handler for class %s!', $class));
         }
 
         if(class_exists($class)) {
-            $this->aliases[$class] = $root;
+            $this->aliases[$class] = $class;
             $this->handlers[$class] = $handler;
         } elseif(interface_exists($class)) {
-            $this->aliases[$class] = $root;
+            $this->aliases[$class] = $class;
             $this->interfaces[$class] = $handler;
         } else {
             throw new \RuntimeException(sprintf('Given value %s is neither class nor interface name!', $class));
@@ -37,11 +37,6 @@ final class FallbackNormalizerContainer implements NormalizerContainerInterface
 
         $this->handlers[$alias] = $handler;
         $this->aliases[$alias] = $this->aliases[$class];
-    }
-
-    public function getRoot($class)
-    {
-        return $this->aliases[$class];
     }
 
     public function getHandler($class)
