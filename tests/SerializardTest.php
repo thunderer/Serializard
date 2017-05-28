@@ -240,14 +240,14 @@ final class SerializardTest extends AbstractTestCase
         $formats->add('json', new JsonFormat());
 
         $hydrators = new FallbackHydratorContainer();
-        $hydrators->add($articleClass, function(array $data, HydratorContainerInterface $hydrators) use($tagClass, $userClass) {
-            $user = call_user_func($hydrators->getHandler($userClass), $data['user'], $hydrators);
-            $tag = call_user_func($hydrators->getHandler($tagClass), $data['tag'], $hydrators);
+        $hydrators->add($articleClass, function(array $data, FallbackHydratorContainer $hydrators) use($tagClass, $userClass) {
+            $user = $hydrators->hydrate($userClass, $data['user']);
+            $tag = $hydrators->hydrate($tagClass, $data['tag']);
 
             return new FakeArticle($data['id'], $data['title'], $user, $tag);
         });
-        $hydrators->add($userClass, function(array $data, HydratorContainerInterface $hydrators) use($tagClass) {
-            $tag = call_user_func($hydrators->getHandler($tagClass), $data['tag'], $hydrators);
+        $hydrators->add($userClass, function(array $data, FallbackHydratorContainer $hydrators) use($tagClass) {
+            $tag = $hydrators->hydrate($tagClass, $data['tag']);
 
             $user = new FakeUser($data['id'], $data['name'], $tag);
             foreach($data['tags'] as $tagData) {

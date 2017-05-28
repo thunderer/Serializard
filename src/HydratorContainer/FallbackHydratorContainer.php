@@ -61,4 +61,9 @@ final class FallbackHydratorContainer implements HydratorContainerInterface
 
         return null;
     }
+
+    public function hydrate($class, array $data)
+    {
+        return call_user_func($this->getHandler($class), $data, $this);
+    }
 }
