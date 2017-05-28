@@ -10,7 +10,7 @@ use Thunder\Serializard\Tests\Fake\FakeUser;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-class FacadeTest extends \PHPUnit_Framework_TestCase
+final class FacadeTest extends AbstractTestCase
 {
     public function testFacade()
     {
@@ -34,7 +34,7 @@ class FacadeTest extends \PHPUnit_Framework_TestCase
     public function testExceptionInvalidFormat()
     {
         $facade = new SerializardFacade();
-        $this->setExpectedException('RuntimeException');
+        $this->expectException('RuntimeException');
         $facade->serialize(new \stdClass(), 'invalid');
     }
 }

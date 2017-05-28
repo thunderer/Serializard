@@ -6,7 +6,7 @@ use Thunder\Serializard\HydratorContainer\FallbackHydratorContainer;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-class HydratorContainerTest extends \PHPUnit_Framework_TestCase
+final class HydratorContainerTest extends AbstractTestCase
 {
     public function testAlias()
     {
@@ -53,28 +53,28 @@ class HydratorContainerTest extends \PHPUnit_Framework_TestCase
         $hydrators->add($typeInterface, 'type', function() { return 'multiple'; });
         $hydrators->add($typeAnother, 'type', function() { return 'multiple'; });
 
-        $this->setExpectedException('RuntimeException');
+        $this->expectException('RuntimeException');
         $hydrators->getHandler($typeMultiple);
     }
 
     public function testInvalidClassOrInterfaceName()
     {
         $handlers = new FallbackHydratorContainer();
-        $this->setExpectedException('RuntimeException');
+        $this->expectException('RuntimeException');
         $handlers->add('invalid', 'root', function() {});
     }
 
     public function testAliasForInvalidClass()
     {
         $handlers = new FallbackHydratorContainer();
-        $this->setExpectedException('RuntimeException');
+        $this->expectException('RuntimeException');
         $handlers->addAlias('stdClass', 'DateTime');
     }
 
     public function testInvalidHandler()
     {
         $handlers = new FallbackHydratorContainer();
-        $this->setExpectedException('RuntimeException');
+        $this->expectException('RuntimeException');
         $handlers->add('stdClass', 'name', 'invalid');
     }
 }

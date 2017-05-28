@@ -22,7 +22,7 @@ use Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-class SerializardTest extends \PHPUnit_Framework_TestCase
+final class SerializardTest extends AbstractTestCase
 {
     /**
      * @param string $prefix
@@ -112,7 +112,7 @@ class SerializardTest extends \PHPUnit_Framework_TestCase
 
         $serializard = new Serializard($formats, $normalizers, $hydrators);
 
-        $this->setExpectedException('RuntimeException');
+        $this->expectException('RuntimeException');
         $serializard->serialize($var, $format);
     }
 
@@ -192,19 +192,19 @@ class SerializardTest extends \PHPUnit_Framework_TestCase
 
     public function testInvalidSerializationFormat()
     {
-        $this->setExpectedException('RuntimeException');
+        $this->expectException('RuntimeException');
         $this->getSerializard()->serialize(new \stdClass(), 'invalid');
     }
 
     public function testInvalidUnserializationFormat()
     {
-        $this->setExpectedException('RuntimeException');
+        $this->expectException('RuntimeException');
         $this->getSerializard()->unserialize(new \stdClass(), 'stdClass', 'invalid');
     }
 
     public function testMissingClassSerializationHandler()
     {
-        $this->setExpectedException('RuntimeException');
+        $this->expectException('RuntimeException');
         $this->getSerializard()->serialize(new \stdClass(), 'json');
     }
 }

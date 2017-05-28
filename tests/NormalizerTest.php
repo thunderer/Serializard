@@ -11,7 +11,7 @@ use Thunder\Serializard\Tests\Fake\PropertyVisibility;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-class NormalizerTest extends \PHPUnit_Framework_TestCase
+final class NormalizerTest extends AbstractTestCase
 {
     public function testReflectionSkip()
     {
