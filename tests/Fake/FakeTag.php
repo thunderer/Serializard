@@ -7,7 +7,7 @@ final class FakeTag
     private $name;
     private $user;
 
-    function __construct($id, $name)
+    public function __construct($id, $name)
     {
         $this->id = $id;
         $this->name = $name;
@@ -21,4 +21,5 @@ final class FakeTag
 
     public function setUser(FakeUserParentParent $user) { $this->user = $user; return $this; }
     public function getUser() { return $this->user; }
+    public function clearUser() { $this->user = null; }
 }

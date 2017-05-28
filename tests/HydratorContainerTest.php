@@ -14,8 +14,8 @@ final class HydratorContainerTest extends AbstractTestCase
         $handlers->add('stdClass', 'std', function() { return 'value'; });
         $handlers->addAlias('DateTime', 'stdClass');
 
-        $this->assertSame('value', call_user_func_array($handlers->getHandler('stdClass'), array()));
-        $this->assertSame('value', call_user_func_array($handlers->getHandler('DateTime'), array()));
+        $this->assertSame('value', call_user_func($handlers->getHandler('stdClass')));
+        $this->assertSame('value', call_user_func($handlers->getHandler('DateTime')));
     }
 
     public function testInterface()
@@ -26,8 +26,8 @@ final class HydratorContainerTest extends AbstractTestCase
         $interfaceTypeB = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeB';
         $hydrators->add($interfaceName, 'type', function() { return 'type'; });
 
-        $this->assertSame('type', call_user_func_array($hydrators->getHandler($interfaceTypeA), array()));
-        $this->assertSame('type', call_user_func_array($hydrators->getHandler($interfaceTypeB), array()));
+        $this->assertSame('type', call_user_func($hydrators->getHandler($interfaceTypeA)));
+        $this->assertSame('type', call_user_func($hydrators->getHandler($interfaceTypeB)));
     }
 
     public function testInheritance()
@@ -38,9 +38,9 @@ final class HydratorContainerTest extends AbstractTestCase
         $userName = 'Thunder\Serializard\Tests\Fake\FakeUser';
         $hydrators->add($ancestorName, 'type', function() { return 'ancestor'; });
 
-        $this->assertSame('ancestor', call_user_func_array($hydrators->getHandler($ancestorName), array()));
-        $this->assertSame('ancestor', call_user_func_array($hydrators->getHandler($parentName), array()));
-        $this->assertSame('ancestor', call_user_func_array($hydrators->getHandler($userName), array()));
+        $this->assertSame('ancestor', call_user_func($hydrators->getHandler($ancestorName)));
+        $this->assertSame('ancestor', call_user_func($hydrators->getHandler($parentName)));
+        $this->assertSame('ancestor', call_user_func($hydrators->getHandler($userName)));
     }
 
     public function testMultipleInterfacesException()

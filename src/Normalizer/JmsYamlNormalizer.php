@@ -23,6 +23,7 @@ final class JmsYamlNormalizer
             throw new \RuntimeException(sprintf('Failed to read file at path %s!', $this->path));
         }
 
+        // FIXME: Cache parsed config within normalizer instance
         $yaml = Yaml::parse($data);
         $keys = array_keys($yaml);
         $yaml = $yaml[$keys[0]];
@@ -56,7 +57,7 @@ final class JmsYamlNormalizer
 
             $method = 'get'.ucfirst($key);
             if(method_exists($var, $method)) {
-                $result[$name] = call_user_func_array([$var, $method], []);
+                $result[$name] = $var->{$method}();
 
                 continue;
             }
@@ -66,7 +67,7 @@ final class JmsYamlNormalizer
 
         $virtual = array_key_exists('virtual_properties', $yaml) ? $yaml['virtual_properties'] : array();
         foreach($virtual as $method => $config) {
-            $result[$config['serialized_name']] = call_user_func_array([$var, $method], []);
+            $result[$config['serialized_name']] = $var->{$method}();
         }
 
         return $result;
