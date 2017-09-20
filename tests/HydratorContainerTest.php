@@ -43,20 +43,6 @@ final class HydratorContainerTest extends AbstractTestCase
         $this->assertSame('ancestor', call_user_func($hydrators->getHandler($userName)));
     }
 
-    public function testMultipleInterfacesException()
-    {
-        $typeInterface = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface';
-        $typeAnother = 'Thunder\Serializard\Tests\Fake\Interfaces\AnotherTypeInterface';
-        $typeMultiple = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeMultiple';
-
-        $hydrators = new FallbackHydratorContainer();
-        $hydrators->add($typeInterface, function() { return 'multiple'; });
-        $hydrators->add($typeAnother, function() { return 'multiple'; });
-
-        $this->expectException('RuntimeException');
-        $hydrators->getHandler($typeMultiple);
-    }
-
     public function testInvalidClassOrInterfaceName()
     {
         $handlers = new FallbackHydratorContainer();

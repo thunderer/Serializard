@@ -43,20 +43,6 @@ final class NormalizerContainerTest extends AbstractTestCase
         $this->assertSame('ancestor', call_user_func($normalizers->getHandler($userName)));
     }
 
-    public function testMultipleInterfacesException()
-    {
-        $typeInterface = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface';
-        $typeAnother = 'Thunder\Serializard\Tests\Fake\Interfaces\AnotherTypeInterface';
-        $typeMultiple = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeMultiple';
-
-        $normalizers = new FallbackNormalizerContainer();
-        $normalizers->add($typeInterface, function() { return 'multiple'; });
-        $normalizers->add($typeAnother, function() { return 'multiple'; });
-
-        $this->expectException('RuntimeException');
-        $normalizers->getHandler($typeMultiple);
-    }
-
     public function testInvalidClassOrInterfaceName()
     {
         $normalizers = new FallbackNormalizerContainer();
