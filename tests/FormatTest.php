@@ -15,21 +15,21 @@ final class FormatTest extends AbstractTestCase
     public function testArrayUnserializeInvalidTypeException()
     {
         $format = new ArrayFormat();
-        $this->expectException('RuntimeException');
+        $this->expectExceptionClass(\RuntimeException::class);
         $format->unserialize(new \stdClass(), 'stdClass', new FallbackHydratorContainer());
     }
 
     public function testMissingUnserializationHandlerException()
     {
         $format = new ArrayFormat();
-        $this->expectException('RuntimeException');
+        $this->expectExceptionClass(\RuntimeException::class);
         $format->unserialize(array(), 'stdClass', new FallbackHydratorContainer());
     }
 
     public function testJsonEncodeSerializationFailureException()
     {
         $format = new JsonFormat();
-        $this->expectException('RuntimeException'); // Inf and NaN cannot be JSON encoded
+        $this->expectExceptionClass(\RuntimeException::class); // Inf and NaN cannot be JSON encoded
         $format->serialize(INF, new FallbackNormalizerContainer(), new FakeNormalizerContext()); // INF is returned as zero on PHP <=5.4
     }
 }

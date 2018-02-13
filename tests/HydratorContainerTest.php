@@ -53,28 +53,28 @@ final class HydratorContainerTest extends AbstractTestCase
         $hydrators->add($typeInterface, function() { return 'multiple'; });
         $hydrators->add($typeAnother, function() { return 'multiple'; });
 
-        $this->expectException('RuntimeException');
+        $this->expectExceptionClass(\RuntimeException::class);
         $hydrators->getHandler($typeMultiple);
     }
 
     public function testInvalidClassOrInterfaceName()
     {
         $handlers = new FallbackHydratorContainer();
-        $this->expectException('RuntimeException');
+        $this->expectExceptionClass(\RuntimeException::class);
         $handlers->add('invalid', function() {});
     }
 
     public function testAliasForInvalidClass()
     {
         $handlers = new FallbackHydratorContainer();
-        $this->expectException('RuntimeException');
-        $handlers->addAlias('stdClass', 'DateTime');
+        $this->expectExceptionClass(\RuntimeException::class);
+        $handlers->addAlias(\stdClass::class, \DateTime::class);
     }
 
     public function testInvalidHandler()
     {
         $handlers = new FallbackHydratorContainer();
-        $this->expectException('RuntimeException');
-        $handlers->add('stdClass', 'invalid');
+        $this->expectExceptionClass(\RuntimeException::class);
+        $handlers->add(\stdClass::class, 'invalid');
     }
 }

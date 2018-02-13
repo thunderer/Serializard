@@ -116,7 +116,7 @@ final class SerializardTest extends AbstractTestCase
 
         $serializard = new Serializard($formats, $normalizers, $hydrators);
 
-        $this->expectException('RuntimeException');
+        $this->expectExceptionClass(\RuntimeException::class);
         $serializard->serialize($var, $format);
     }
 
@@ -337,19 +337,19 @@ final class SerializardTest extends AbstractTestCase
 
     public function testInvalidSerializationFormat()
     {
-        $this->expectException('RuntimeException');
+        $this->expectExceptionClass(\RuntimeException::class);
         $this->getSerializard()->serialize(new \stdClass(), 'invalid');
     }
 
     public function testInvalidUnserializationFormat()
     {
-        $this->expectException('RuntimeException');
-        $this->getSerializard()->unserialize(new \stdClass(), 'stdClass', 'invalid');
+        $this->expectExceptionClass(\RuntimeException::class);
+        $this->getSerializard()->unserialize(new \stdClass(), \stdClass::class, 'invalid');
     }
 
     public function testMissingClassSerializationHandler()
     {
-        $this->expectException('RuntimeException');
+        $this->expectExceptionClass(\RuntimeException::class);
         $this->getSerializard()->serialize(new \stdClass(), 'json');
     }
 }

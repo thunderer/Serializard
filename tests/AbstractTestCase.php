@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
  */
 abstract class AbstractTestCase extends TestCase
 {
-    public function expectException($exception)
+    public function expectExceptionClass($exception)
     {
         version_compare(phpversion(), '7.0.0') > 0
             ? parent::expectException($exception)

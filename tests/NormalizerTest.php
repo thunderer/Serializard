@@ -55,7 +55,7 @@ final class NormalizerTest extends AbstractTestCase
 
     public function testCallbackNormalizerInvalidCallback()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectExceptionClass(\InvalidArgumentException::class);
         new CallbackNormalizer('invalid');
     }
 }

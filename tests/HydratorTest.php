@@ -10,7 +10,7 @@ final class HydratorTest extends AbstractTestCase
 {
     public function testReflectionHydratorInvalidClass()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectExceptionClass(\InvalidArgumentException::class);
         new ReflectionHydrator('invalid', []);
     }
 }

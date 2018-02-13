@@ -34,7 +34,7 @@ final class FacadeTest extends AbstractTestCase
     public function testExceptionInvalidFormat()
     {
         $facade = new SerializardFacade();
-        $this->expectException('RuntimeException');
+        $this->expectExceptionClass(\RuntimeException::class);
         $facade->serialize(new \stdClass(), 'invalid');
     }
 }

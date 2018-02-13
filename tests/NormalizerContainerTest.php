@@ -53,28 +53,28 @@ final class NormalizerContainerTest extends AbstractTestCase
         $normalizers->add($typeInterface, function() { return 'multiple'; });
         $normalizers->add($typeAnother, function() { return 'multiple'; });
 
-        $this->expectException('RuntimeException');
+        $this->expectExceptionClass(\RuntimeException::class);
         $normalizers->getHandler($typeMultiple);
     }
 
     public function testInvalidClassOrInterfaceName()
     {
         $normalizers = new FallbackNormalizerContainer();
-        $this->expectException('RuntimeException');
+        $this->expectExceptionClass(\RuntimeException::class);
         $normalizers->add('invalid', function() {});
     }
 
     public function testAliasForInvalidClass()
     {
         $normalizers = new FallbackNormalizerContainer();
-        $this->expectException('RuntimeException');
-        $normalizers->addAlias('stdClass', 'DateTime');
+        $this->expectExceptionClass(\RuntimeException::class);
+        $normalizers->addAlias(\stdClass::class, \DateTime::class);
     }
 
     public function testInvalidHandler()
     {
         $normalizers = new FallbackNormalizerContainer();
-        $this->expectException('RuntimeException');
-        $normalizers->add('stdClass', 'invalid');
+        $this->expectExceptionClass(\RuntimeException::class);
+        $normalizers->add(\stdClass::class, 'invalid');
     }
 }
