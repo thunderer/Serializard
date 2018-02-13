@@ -6,6 +6,7 @@ namespace Thunder\Serializard\NormalizerContainer;
  */
 final class FallbackNormalizerContainer implements NormalizerContainerInterface
 {
+    private $default;
     private $handlers = array();
     private $interfaces = array();
     private $aliases = array();
@@ -59,6 +60,25 @@ final class FallbackNormalizerContainer implements NormalizerContainerInterface
             return $this->interfaces[array_shift($interfaces)];
         }
 
-        return null;
+        return $this->default;
+    }
+
+    public function setDefault($handler)
+    {
+        if(false === is_callable($handler)) {
+            throw new \InvalidArgumentException('Default normalizer handler must be callable!');
+        }
+
+        $this->default = $handler;
+    }
+
+    public function hasDefault()
+    {
+        return null !== $this->default;
+    }
+
+    public function getDefault()
+    {
+        return $this->default;
     }
 }

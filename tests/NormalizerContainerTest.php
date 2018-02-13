@@ -55,6 +55,37 @@ final class NormalizerContainerTest extends AbstractTestCase
         $normalizers->getHandler(TypeMultiple::class);
     }
 
+    public function testNoDefaultHandler()
+    {
+        $normalizers = new FallbackNormalizerContainer();
+        $this->assertFalse($normalizers->hasDefault());
+        $this->assertNull($normalizers->getDefault());
+
+        $handler = function() {};
+        $normalizers->setDefault($handler);
+        $this->assertTrue($normalizers->hasDefault());
+        $this->assertSame($handler, $normalizers->getDefault());
+    }
+
+    public function testDefaultHandlerFallback()
+    {
+        $direct = function() {};
+        $fallback = function() {};
+        $normalizers = new FallbackNormalizerContainer();
+        $normalizers->add(\DateTime::class, $direct);
+        $normalizers->setDefault($fallback);
+
+        $this->assertSame($direct, $normalizers->getHandler(\DateTime::class));
+        $this->assertSame($fallback, $normalizers->getHandler(\DateTimeImmutable::class));
+    }
+
+    public function testExceptionOnInvalidDefaultHandler()
+    {
+        $normalizers = new FallbackNormalizerContainer();
+        $this->expectExceptionClass(\InvalidArgumentException::class);
+        $normalizers->setDefault('invalid');
+    }
+
     public function testInvalidClassOrInterfaceName()
     {
         $normalizers = new FallbackNormalizerContainer();
