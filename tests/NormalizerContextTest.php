@@ -12,9 +12,9 @@ final class NormalizerContextTest extends AbstractTestCase
     {
         $ctx = new ParentNormalizerContext();
         $this->assertSame(0, $ctx->getLevel());
-        $this->assertNull(null, $ctx->getParent());
-        $this->assertNull(null, $ctx->getFormat());
-        $this->assertNull(null, $ctx->getRoot());
+        $this->assertNull($ctx->getParent());
+        $this->assertNull($ctx->getFormat());
+        $this->assertNull($ctx->getRoot());
 
         $object = new \stdClass();
         $ctx = $ctx->withRoot($object)->withFormat('json');

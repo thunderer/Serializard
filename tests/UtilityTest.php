@@ -10,20 +10,20 @@ final class UtilityTest extends AbstractTestCase
 {
     public function testInvalidKey()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectExceptionClass(\InvalidArgumentException::class);
         new RootElementProviderUtility([0 => 'Class']);
     }
 
     public function testInvalidValue()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectExceptionClass(\InvalidArgumentException::class);
         new RootElementProviderUtility(['Class' => 0]);
     }
 
     public function testRootElementAliasNotFound()
     {
         $utility = new RootElementProviderUtility([]);
-        $this->expectException('RuntimeException');
+        $this->expectExceptionClass(\RuntimeException::class);
         $utility('invalid');
     }
 }
