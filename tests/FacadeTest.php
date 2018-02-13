@@ -14,21 +14,20 @@ final class FacadeTest extends AbstractTestCase
 {
     public function testFacade()
     {
-        $userClass = 'Thunder\Serializard\Tests\Fake\FakeUser';
         $json = '{"id":1,"name":"em@ail.com"}';
         $user = new FakeUser(1, 'em@ail.com', new FakeTag(1, 'tag'));
 
         $facade = new SerializardFacade();
         $facade->addFormat('thunder', new JsonFormat());
-        $facade->addNormalizer($userClass, new ReflectionNormalizer(array('tag', 'tags')));
-        $facade->addHydrator($userClass, function(array $data) {
+        $facade->addNormalizer(FakeUser::class, new ReflectionNormalizer(array('tag', 'tags')));
+        $facade->addHydrator(FakeUser::class, function(array $data) {
             return new FakeUser($data['id'], $data['name'], new FakeTag(1, 'name'));
         });
 
         $this->assertSame($json, $facade->serialize($user, 'json'));
         $this->assertSame($json, $facade->serialize($user, 'thunder'));
-        $this->assertInstanceOf($userClass, $facade->unserialize($json, $userClass, 'json'));
-        $this->assertSame(1, $facade->unserialize($json, $userClass, 'json')->getId());
+        $this->assertInstanceOf(FakeUser::class, $facade->unserialize($json, FakeUser::class, 'json'));
+        $this->assertSame(1, $facade->unserialize($json, FakeUser::class, 'json')->getId());
     }
 
     public function testExceptionInvalidFormat()

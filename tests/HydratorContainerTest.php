@@ -2,6 +2,14 @@
 namespace Thunder\Serializard\Tests;
 
 use Thunder\Serializard\HydratorContainer\FallbackHydratorContainer;
+use Thunder\Serializard\Tests\Fake\FakeUser;
+use Thunder\Serializard\Tests\Fake\FakeUserParent;
+use Thunder\Serializard\Tests\Fake\FakeUserParentParent;
+use Thunder\Serializard\Tests\Fake\Interfaces\AnotherTypeInterface;
+use Thunder\Serializard\Tests\Fake\Interfaces\TypeA;
+use Thunder\Serializard\Tests\Fake\Interfaces\TypeB;
+use Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface;
+use Thunder\Serializard\Tests\Fake\Interfaces\TypeMultiple;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -11,50 +19,40 @@ final class HydratorContainerTest extends AbstractTestCase
     public function testAlias()
     {
         $handlers = new FallbackHydratorContainer();
-        $handlers->add('stdClass', function() { return 'value'; });
-        $handlers->addAlias('DateTime', 'stdClass');
+        $handlers->add(\stdClass::class, function() { return 'value'; });
+        $handlers->addAlias(\DateTime::class, \stdClass::class);
 
-        $this->assertSame('value', call_user_func($handlers->getHandler('stdClass')));
-        $this->assertSame('value', call_user_func($handlers->getHandler('DateTime')));
+        $this->assertSame('value', call_user_func($handlers->getHandler(\stdClass::class)));
+        $this->assertSame('value', call_user_func($handlers->getHandler(\DateTime::class)));
     }
 
     public function testInterface()
     {
         $hydrators = new FallbackHydratorContainer();
-        $interfaceName = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface';
-        $interfaceTypeA = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeA';
-        $interfaceTypeB = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeB';
-        $hydrators->add($interfaceName, function() { return 'type'; });
+        $hydrators->add(TypeInterface::class, function() { return 'type'; });
 
-        $this->assertSame('type', call_user_func($hydrators->getHandler($interfaceTypeA)));
-        $this->assertSame('type', call_user_func($hydrators->getHandler($interfaceTypeB)));
+        $this->assertSame('type', call_user_func($hydrators->getHandler(TypeA::class)));
+        $this->assertSame('type', call_user_func($hydrators->getHandler(TypeB::class)));
     }
 
     public function testInheritance()
     {
         $hydrators = new FallbackHydratorContainer();
-        $ancestorName = 'Thunder\Serializard\Tests\Fake\FakeUserParentParent';
-        $parentName = 'Thunder\Serializard\Tests\Fake\FakeUserParent';
-        $userName = 'Thunder\Serializard\Tests\Fake\FakeUser';
-        $hydrators->add($ancestorName, function() { return 'ancestor'; });
+        $hydrators->add(FakeUserParentParent::class, function() { return 'ancestor'; });
 
-        $this->assertSame('ancestor', call_user_func($hydrators->getHandler($ancestorName)));
-        $this->assertSame('ancestor', call_user_func($hydrators->getHandler($parentName)));
-        $this->assertSame('ancestor', call_user_func($hydrators->getHandler($userName)));
+        $this->assertSame('ancestor', call_user_func($hydrators->getHandler(FakeUserParentParent::class)));
+        $this->assertSame('ancestor', call_user_func($hydrators->getHandler(FakeUserParent::class)));
+        $this->assertSame('ancestor', call_user_func($hydrators->getHandler(FakeUser::class)));
     }
 
     public function testMultipleInterfacesException()
     {
-        $typeInterface = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface';
-        $typeAnother = 'Thunder\Serializard\Tests\Fake\Interfaces\AnotherTypeInterface';
-        $typeMultiple = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeMultiple';
-
         $hydrators = new FallbackHydratorContainer();
-        $hydrators->add($typeInterface, function() { return 'multiple'; });
-        $hydrators->add($typeAnother, function() { return 'multiple'; });
+        $hydrators->add(TypeInterface::class, function() { return 'multiple'; });
+        $hydrators->add(AnotherTypeInterface::class, function() { return 'multiple'; });
 
         $this->expectExceptionClass(\RuntimeException::class);
-        $hydrators->getHandler($typeMultiple);
+        $hydrators->getHandler(TypeMultiple::class);
     }
 
     public function testInvalidClassOrInterfaceName()

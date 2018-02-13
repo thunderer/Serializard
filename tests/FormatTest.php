@@ -16,14 +16,14 @@ final class FormatTest extends AbstractTestCase
     {
         $format = new ArrayFormat();
         $this->expectExceptionClass(\RuntimeException::class);
-        $format->unserialize(new \stdClass(), 'stdClass', new FallbackHydratorContainer());
+        $format->unserialize(new \stdClass(), \stdClass::class, new FallbackHydratorContainer());
     }
 
     public function testMissingUnserializationHandlerException()
     {
         $format = new ArrayFormat();
         $this->expectExceptionClass(\RuntimeException::class);
-        $format->unserialize(array(), 'stdClass', new FallbackHydratorContainer());
+        $format->unserialize(array(), \stdClass::class, new FallbackHydratorContainer());
     }
 
     public function testJsonEncodeSerializationFailureException()

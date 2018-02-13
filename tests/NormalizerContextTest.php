@@ -17,6 +17,7 @@ final class NormalizerContextTest extends AbstractTestCase
         $this->assertNull($ctx->getRoot());
 
         $object = new \stdClass();
+        /** @var ParentNormalizerContext $ctx */
         $ctx = $ctx->withRoot($object)->withFormat('json');
 
         $ctx = $ctx->withParent($object);

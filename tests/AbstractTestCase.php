@@ -10,7 +10,7 @@ abstract class AbstractTestCase extends TestCase
 {
     public function expectExceptionClass($exception)
     {
-        version_compare(phpversion(), '7.0.0') > 0
+        version_compare(PHP_VERSION, '7.0.0') > 0
             ? parent::expectException($exception)
             : $this->setExpectedException($exception);
     }

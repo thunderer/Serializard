@@ -44,38 +44,35 @@ final class SerializardTest extends AbstractTestCase
         $xml = $serializard->serialize($object, 'xml');
         $array = $serializard->serialize($object, 'array');
 
-        $this->assertSame(file_get_contents($file.'.json'), $json."\n");
-        $this->assertSame(file_get_contents($file.'.yaml'), $yaml);
-        $this->assertSame(file_get_contents($file.'.xml'), $xml);
+        $this->assertStringEqualsFile($file.'.json', $json."\n");
+        $this->assertStringEqualsFile($file.'.yaml', $yaml);
+        $this->assertStringEqualsFile($file.'.xml', $xml);
         $this->assertSame(require $file.'.php', $array);
 
-        $userClass = 'Thunder\Serializard\Tests\Fake\FakeUser';
-
-        $this->assertSame($json, $serializard->serialize($serializard->unserialize($json, $userClass, 'json'), 'json'));
-        $this->assertSame($yaml, $serializard->serialize($serializard->unserialize($yaml, $userClass, 'yaml'), 'yaml'));
-        $this->assertSame($xml, $serializard->serialize($serializard->unserialize($xml, $userClass, 'xml'), 'xml'));
-        $this->assertSame($array, $serializard->serialize($serializard->unserialize($array, $userClass, 'array'), 'array'));
+        $this->assertSame($json, $serializard->serialize($serializard->unserialize($json, FakeUser::class, 'json'), 'json'));
+        $this->assertSame($yaml, $serializard->serialize($serializard->unserialize($yaml, FakeUser::class, 'yaml'), 'yaml'));
+        $this->assertSame($xml, $serializard->serialize($serializard->unserialize($xml, FakeUser::class, 'xml'), 'xml'));
+        $this->assertSame($array, $serializard->serialize($serializard->unserialize($array, FakeUser::class, 'array'), 'array'));
     }
 
     public function provideExamples()
     {
-        return array(
-            array('simple', function() {
+        return [
+            ['simple', function() {
                 $user = new FakeUser(1, 'Thomas', new FakeTag(100, 'various'));
                 $user->addTag(new FakeTag(10, 'sth'));
                 $user->addTag(new FakeTag(11, 'xyz'));
                 $user->addTag(new FakeTag(12, 'rnd'));
 
                 return $user;
-            }),
-        );
+            }],
+        ];
     }
 
     public function testInterfaces()
     {
-        $interface = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface';
         $normalizers = new FallbackNormalizerContainer();
-        $normalizers->add($interface, function(TypeInterface $type) {
+        $normalizers->add(TypeInterface::class, function(TypeInterface $type) {
             return array(
                 'type' => $type->getType(),
                 'value' => $type->getValue(),
@@ -96,12 +93,9 @@ final class SerializardTest extends AbstractTestCase
     /** @dataProvider provideCycles */
     public function testCycleException($var, $format)
     {
-        $userClass = 'Thunder\Serializard\Tests\Fake\FakeUser';
-        $tagClass = 'Thunder\Serializard\Tests\Fake\FakeTag';
-
         $normalizers = new FallbackNormalizerContainer();
-        $normalizers->add($userClass, new ReflectionNormalizer());
-        $normalizers->add($tagClass, new ReflectionNormalizer());
+        $normalizers->add(FakeUser::class, new ReflectionNormalizer());
+        $normalizers->add(FakeTag::class, new ReflectionNormalizer());
 
         $hydrators = new FallbackHydratorContainer();
 
@@ -137,12 +131,9 @@ final class SerializardTest extends AbstractTestCase
 
     private function getSerializard()
     {
-        $userClass = 'Thunder\Serializard\Tests\Fake\FakeUser';
-        $tagClass = 'Thunder\Serializard\Tests\Fake\FakeTag';
-
         $normalizers = new FallbackNormalizerContainer();
-        $normalizers->add($userClass, new ReflectionNormalizer());
-        $normalizers->add($tagClass, function(FakeTag $tag) {
+        $normalizers->add(FakeUser::class, new ReflectionNormalizer());
+        $normalizers->add(FakeTag::class, function(FakeTag $tag) {
             return array(
                 'id' => $tag->getId(),
                 'name' => $tag->getName(),
@@ -150,8 +141,8 @@ final class SerializardTest extends AbstractTestCase
         });
 
         $hydrators = new FallbackHydratorContainer();
-        $hydrators->add($userClass, function(array $data, Hydrators $handlers) use($tagClass) {
-            $tagHandler = $handlers->getHandler($tagClass);
+        $hydrators->add(FakeUser::class, function(array $data, Hydrators $handlers) {
+            $tagHandler = $handlers->getHandler(FakeTag::class);
 
             $user = new FakeUser($data['id'], $data['name'], $tagHandler($data['tag'], $handlers));
             foreach($data['tags'] as $tag) {
@@ -160,7 +151,7 @@ final class SerializardTest extends AbstractTestCase
 
             return $user;
         });
-        $hydrators->add($tagClass, function(array $data, Hydrators $handlers) {
+        $hydrators->add(FakeTag::class, function(array $data, Hydrators $handlers) {
             return new FakeTag($data['id'], $data['name']);
         });
 
@@ -178,7 +169,6 @@ final class SerializardTest extends AbstractTestCase
 
     public function testParent()
     {
-        $userClass = 'Thunder\Serializard\Tests\Fake\FakeUser';
         $user = new FakeUser(1, 'em@ail.com', new FakeTag(1, 'tag'));
 
         $formats = new FormatContainer();
@@ -187,34 +177,30 @@ final class SerializardTest extends AbstractTestCase
         $hydrators = new FallbackHydratorContainer();
         $serializard = new Serializard($formats, $normalizers, $hydrators);
 
-        $normalizers->add($userClass.'ParentParent', function(FakeUserParentParent $user) { return 'ancestor'; });
+        $normalizers->add(FakeUserParentParent::class, function(FakeUserParentParent $user) { return 'ancestor'; });
         $this->assertSame('ancestor', $serializard->serialize($user, 'array'));
 
-        $normalizers->add($userClass.'Parent', function(FakeUserParent $user) { return 'parent'; });
+        $normalizers->add(FakeUserParent::class, function(FakeUserParent $user) { return 'parent'; });
         $this->assertSame('parent', $serializard->serialize($user, 'array'));
 
-        $normalizers->add($userClass, function(FakeUser $user) { return 'user'; });
+        $normalizers->add(FakeUser::class, function(FakeUser $user) { return 'user'; });
         $this->assertSame('user', $serializard->serialize($user, 'array'));
     }
 
     public function testContext()
     {
-        $userClass = 'Thunder\Serializard\Tests\Fake\FakeUser';
-        $articleClass = 'Thunder\Serializard\Tests\Fake\FakeArticle';
-        $tagClass = 'Thunder\Serializard\Tests\Fake\FakeTag';
-
         $formats = new FormatContainer();
         $formats->add('format', new ArrayFormat());
 
         $hydrators = new FallbackHydratorContainer();
         $normalizers = new FallbackNormalizerContainer();
-        $normalizers->add($articleClass, function(FakeArticle $article) {
+        $normalizers->add(FakeArticle::class, function(FakeArticle $article) {
             return $article->getTag();
         });
-        $normalizers->add($userClass, function(FakeUser $user) {
+        $normalizers->add(FakeUser::class, function(FakeUser $user) {
             return $user->getTag();
         });
-        $normalizers->add($tagClass, function(FakeTag $tag, NormalizerContextInterface $context) {
+        $normalizers->add(FakeTag::class, function(FakeTag $tag, NormalizerContextInterface $context) {
             return get_class($context->getParent());
         });
 
@@ -224,44 +210,40 @@ final class SerializardTest extends AbstractTestCase
         $user = new FakeUser(1, 'name', $tag);
         $article = new FakeArticle(1, 'title', $user, $tag);
 
-        $this->assertSame($userClass, $serializard->serialize($user, 'format', new FakeNormalizerContext()));
+        $this->assertSame(FakeUser::class, $serializard->serialize($user, 'format', new FakeNormalizerContext()));
         $context = new FakeNormalizerContext();
-        $this->assertSame($articleClass, $serializard->serialize($article, 'format', $context));
+        $this->assertSame(FakeArticle::class, $serializard->serialize($article, 'format', $context));
         $this->assertSame(2, $context->getLevel());
     }
 
     public function testProcessWithCallbacks()
     {
-        $userClass = 'Thunder\Serializard\Tests\Fake\FakeUser';
-        $articleClass = 'Thunder\Serializard\Tests\Fake\FakeArticle';
-        $tagClass = 'Thunder\Serializard\Tests\Fake\FakeTag';
-
         $formats = new FormatContainer();
         $formats->add('json', new JsonFormat());
 
         $hydrators = new FallbackHydratorContainer();
-        $hydrators->add($articleClass, function(array $data, FallbackHydratorContainer $hydrators) use($tagClass, $userClass) {
-            $user = $hydrators->hydrate($userClass, $data['user']);
-            $tag = $hydrators->hydrate($tagClass, $data['tag']);
+        $hydrators->add(FakeArticle::class, function(array $data, FallbackHydratorContainer $hydrators) {
+            $user = $hydrators->hydrate(FakeUser::class, $data['user']);
+            $tag = $hydrators->hydrate(FakeTag::class, $data['tag']);
 
             return new FakeArticle($data['id'], $data['title'], $user, $tag);
         });
-        $hydrators->add($userClass, function(array $data, FallbackHydratorContainer $hydrators) use($tagClass) {
-            $tag = $hydrators->hydrate($tagClass, $data['tag']);
+        $hydrators->add(FakeUser::class, function(array $data, FallbackHydratorContainer $hydrators) {
+            $tag = $hydrators->hydrate(FakeTag::class, $data['tag']);
 
             $user = new FakeUser($data['id'], $data['name'], $tag);
             foreach($data['tags'] as $tagData) {
-                $user->addTag(call_user_func($hydrators->getHandler($tagClass), $tagData, $hydrators));
+                $user->addTag(call_user_func($hydrators->getHandler(FakeTag::class), $tagData, $hydrators));
             }
 
             return $user;
         });
-        $hydrators->add($tagClass, function(array $data, HydratorContainerInterface $hydrators) {
+        $hydrators->add(FakeTag::class, function(array $data, HydratorContainerInterface $hydrators) {
             return new FakeTag($data['id'], $data['name']);
         });
 
         $normalizers = new FallbackNormalizerContainer();
-        $normalizers->add($articleClass, function(FakeArticle $article, NormalizerContextInterface $context) {
+        $normalizers->add(FakeArticle::class, function(FakeArticle $article, NormalizerContextInterface $context) {
             return array(
                 'id' => $article->getId(),
                 'title' => $article->getTitle(),
@@ -269,7 +251,7 @@ final class SerializardTest extends AbstractTestCase
                 'tag' => $article->getTag(),
             );
         });
-        $normalizers->add($userClass, function(FakeUser $user, NormalizerContextInterface $context) {
+        $normalizers->add(FakeUser::class, function(FakeUser $user, NormalizerContextInterface $context) {
             return array(
                 'id' => $user->getId(),
                 'name' => $user->getName(),
@@ -277,7 +259,7 @@ final class SerializardTest extends AbstractTestCase
                 'tags' => $user->getTags(),
             );
         });
-        $normalizers->add($tagClass, function(FakeTag $tag, NormalizerContextInterface $context) {
+        $normalizers->add(FakeTag::class, function(FakeTag $tag, NormalizerContextInterface $context) {
             return array(
                 'id' => $tag->getId(),
                 'name' => $tag->getName(),
@@ -293,33 +275,29 @@ final class SerializardTest extends AbstractTestCase
 
         $json = $serializard->serialize($article, 'json', new FakeNormalizerContext());
 
-        $this->assertEquals($article, $serializard->unserialize($json, $articleClass, 'json'));
+        $this->assertEquals($article, $serializard->unserialize($json, FakeArticle::class, 'json'));
     }
 
     public function testProcessWithReflection()
     {
-        $userClass = 'Thunder\Serializard\Tests\Fake\FakeUser';
-        $articleClass = 'Thunder\Serializard\Tests\Fake\FakeArticle';
-        $tagClass = 'Thunder\Serializard\Tests\Fake\FakeTag';
-
         $formats = new FormatContainer();
         $formats->add('json', new JsonFormat());
 
         $hydrators = new FallbackHydratorContainer();
-        $hydrators->add($articleClass, new ReflectionHydrator($articleClass, array(
-            'user' => $userClass,
-            'tag' => $tagClass,
+        $hydrators->add(FakeArticle::class, new ReflectionHydrator(FakeArticle::class, array(
+            'user' => FakeUser::class,
+            'tag' => FakeTag::class,
         )));
-        $hydrators->add($userClass, new ReflectionHydrator($userClass, array(
-            'tag' => $tagClass,
-            'tags' => $tagClass.'[]',
+        $hydrators->add(FakeUser::class, new ReflectionHydrator(FakeUser::class, array(
+            'tag' => FakeTag::class,
+            'tags' => FakeTag::class.'[]',
         )));
-        $hydrators->add($tagClass, new ReflectionHydrator($tagClass, array()));
+        $hydrators->add(FakeTag::class, new ReflectionHydrator(FakeTag::class, array()));
 
         $normalizers = new FallbackNormalizerContainer();
-        $normalizers->add($articleClass, new ReflectionNormalizer());
-        $normalizers->add($userClass, new ReflectionNormalizer());
-        $normalizers->add($tagClass, new ReflectionNormalizer(array('user')));
+        $normalizers->add(FakeArticle::class, new ReflectionNormalizer());
+        $normalizers->add(FakeUser::class, new ReflectionNormalizer());
+        $normalizers->add(FakeTag::class, new ReflectionNormalizer(array('user')));
 
         $serializard = new Serializard($formats, $normalizers, $hydrators);
 
@@ -332,7 +310,7 @@ final class SerializardTest extends AbstractTestCase
 
         $json = $serializard->serialize($article, 'json', new FakeNormalizerContext());
 
-        $this->assertEquals($article, $serializard->unserialize($json, $articleClass, 'json'));
+        $this->assertEquals($article, $serializard->unserialize($json, FakeArticle::class, 'json'));
     }
 
     public function testInvalidSerializationFormat()
