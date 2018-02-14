@@ -1,14 +1,14 @@
 <?php
-return array(
+return [
     'id' =>  1,
     'name' => 'Thomas',
-    'tag' => array(
+    'tag' => [
         'id' => 100,
         'name' => 'various',
-    ),
-    'tags' => array(
-        array('id' => 10, 'name' => 'sth'),
-        array('id' => 11, 'name' => 'xyz'),
-        array('id' => 12, 'name' => 'rnd'),
-    ),
-);
+    ],
+    'tags' => [
+        ['id' => 10, 'name' => 'sth'],
+        ['id' => 11, 'name' => 'xyz'],
+        ['id' => 12, 'name' => 'rnd'],
+    ],
+];

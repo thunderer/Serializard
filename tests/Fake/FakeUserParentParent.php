@@ -7,7 +7,7 @@ class FakeUserParentParent
     protected $name;
     protected $tag;
     /** @var FakeTag[] */
-    protected $tags = array();
+    protected $tags = [];
 
     public function __construct($id, $name, FakeTag $tag)
     {

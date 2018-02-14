@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Serializard\Tests;
 
+use Thunder\Serializard\Exception\FormatNotFoundException;
 use Thunder\Serializard\Format\JsonFormat;
 use Thunder\Serializard\Normalizer\ReflectionNormalizer;
 use Thunder\Serializard\SerializardFacade;
@@ -19,7 +20,7 @@ final class FacadeTest extends AbstractTestCase
 
         $facade = new SerializardFacade();
         $facade->addFormat('thunder', new JsonFormat());
-        $facade->addNormalizer(FakeUser::class, new ReflectionNormalizer(array('tag', 'tags')));
+        $facade->addNormalizer(FakeUser::class, new ReflectionNormalizer(['tag', 'tags']));
         $facade->addHydrator(FakeUser::class, function(array $data) {
             return new FakeUser($data['id'], $data['name'], new FakeTag(1, 'name'));
         });
@@ -33,7 +34,7 @@ final class FacadeTest extends AbstractTestCase
     public function testExceptionInvalidFormat()
     {
         $facade = new SerializardFacade();
-        $this->expectExceptionClass(\RuntimeException::class);
+        $this->expectExceptionClass(FormatNotFoundException::class);
         $facade->serialize(new \stdClass(), 'invalid');
     }
 }

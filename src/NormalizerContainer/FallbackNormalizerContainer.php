@@ -1,20 +1,25 @@
 <?php
 namespace Thunder\Serializard\NormalizerContainer;
 
+use Thunder\Serializard\Exception\InvalidClassNameException;
+use Thunder\Serializard\Exception\InvalidNormalizerException;
+use Thunder\Serializard\Exception\NormalizerConflictException;
+use Thunder\Serializard\Exception\NormalizerNotFoundException;
+
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 final class FallbackNormalizerContainer implements NormalizerContainerInterface
 {
     private $default;
-    private $handlers = array();
-    private $interfaces = array();
-    private $aliases = array();
+    private $handlers = [];
+    private $interfaces = [];
+    private $aliases = [];
 
     public function add($class, $handler)
     {
         if(false === is_callable($handler)) {
-            throw new \RuntimeException(sprintf('Invalid handler for class %s!', $class));
+            throw new InvalidNormalizerException(sprintf('Invalid handler for class %s!', $class));
         }
 
         if(class_exists($class)) {
@@ -24,7 +29,7 @@ final class FallbackNormalizerContainer implements NormalizerContainerInterface
             $this->aliases[$class] = $class;
             $this->interfaces[$class] = $handler;
         } else {
-            throw new \RuntimeException(sprintf('Given value %s is neither class nor interface name!', $class));
+            throw new InvalidClassNameException(sprintf('Given value %s is neither class nor interface name!', $class));
         }
     }
 
@@ -33,7 +38,7 @@ final class FallbackNormalizerContainer implements NormalizerContainerInterface
         $handler = $this->getHandler($class);
 
         if(null === $handler) {
-            throw new \RuntimeException(sprintf('Handler for class %s does not exist!', $class));
+            throw new NormalizerNotFoundException(sprintf('Handler for class %s does not exist!', $class));
         }
 
         $this->handlers[$alias] = $handler;
@@ -54,7 +59,7 @@ final class FallbackNormalizerContainer implements NormalizerContainerInterface
         $interfaces = array_intersect(array_keys($this->interfaces), array_values(class_implements($class)));
         if($interfaces) {
             if(count($interfaces) > 1) {
-                throw new \RuntimeException(sprintf('Class %s implements interfaces with colliding handlers!', $class));
+                throw new NormalizerConflictException(sprintf('Class %s implements interfaces with colliding handlers!', $class));
             }
 
             return $this->interfaces[array_shift($interfaces)];
@@ -66,7 +71,7 @@ final class FallbackNormalizerContainer implements NormalizerContainerInterface
     public function setDefault($handler)
     {
         if(false === is_callable($handler)) {
-            throw new \InvalidArgumentException('Default normalizer handler must be callable!');
+            throw new InvalidNormalizerException('Default normalizer handler must be callable!');
         }
 
         $this->default = $handler;

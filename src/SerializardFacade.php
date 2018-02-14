@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Serializard;
 
+use Thunder\Serializard\Exception\FormatNotFoundException;
 use Thunder\Serializard\Format\ArrayFormat;
 use Thunder\Serializard\Format\FormatInterface;
 use Thunder\Serializard\Format\JsonFormat;
@@ -67,7 +68,7 @@ final class SerializardFacade
         $format = $this->formats->get($alias);
 
         if(false === $format instanceof FormatInterface) {
-            throw new \RuntimeException(sprintf('No registered format for alias %s!', $alias));
+            throw new FormatNotFoundException(sprintf('No registered format for alias %s.', $alias));
         }
 
         return $format;

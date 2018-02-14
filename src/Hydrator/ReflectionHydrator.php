@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Serializard\Hydrator;
 
+use Thunder\Serializard\Exception\InvalidClassNameException;
 use Thunder\Serializard\HydratorContainer\HydratorContainerInterface;
 
 final class ReflectionHydrator
@@ -11,7 +12,7 @@ final class ReflectionHydrator
     public function __construct($class, array $objects)
     {
         if(false === class_exists($class)) {
-            throw new \InvalidArgumentException(sprintf('Unknown hydration class %s!', $class));
+            throw new InvalidClassNameException(sprintf('Unknown hydration class %s!', $class));
         }
 
         $this->class = $class;
@@ -48,7 +49,7 @@ final class ReflectionHydrator
         }
 
         $type = substr($type, 0, -2);
-        $items = array();
+        $items = [];
         foreach($data as $item) {
             $items[] = call_user_func($hydrators->getHandler($type), $item, $hydrators);
         }

@@ -1,6 +1,9 @@
 <?php
 namespace Thunder\Serializard\Tests;
 
+use Thunder\Serializard\Exception\CircularReferenceException;
+use Thunder\Serializard\Exception\FormatNotFoundException;
+use Thunder\Serializard\Exception\NormalizerNotFoundException;
 use Thunder\Serializard\Format\ArrayFormat;
 use Thunder\Serializard\Format\JsonFormat;
 use Thunder\Serializard\Format\XmlFormat;
@@ -73,10 +76,10 @@ final class SerializardTest extends AbstractTestCase
     {
         $normalizers = new FallbackNormalizerContainer();
         $normalizers->add(TypeInterface::class, function(TypeInterface $type) {
-            return array(
+            return [
                 'type' => $type->getType(),
                 'value' => $type->getValue(),
-            );
+            ];
         });
 
         $hydrators = new FallbackHydratorContainer();
@@ -86,8 +89,8 @@ final class SerializardTest extends AbstractTestCase
 
         $serializard = new Serializard($formats, $normalizers, $hydrators);
 
-        $this->assertSame(array('type' => 'typeA', 'value' => 'valueA'), $serializard->serialize(new TypeA(), 'array'));
-        $this->assertSame(array('type' => 'typeB', 'value' => 'valueB'), $serializard->serialize(new TypeB(), 'array'));
+        $this->assertSame(['type' => 'typeA', 'value' => 'valueA'], $serializard->serialize(new TypeA(), 'array'));
+        $this->assertSame(['type' => 'typeB', 'value' => 'valueB'], $serializard->serialize(new TypeB(), 'array'));
     }
 
     /** @dataProvider provideCycles */
@@ -110,7 +113,7 @@ final class SerializardTest extends AbstractTestCase
 
         $serializard = new Serializard($formats, $normalizers, $hydrators);
 
-        $this->expectExceptionClass(\RuntimeException::class);
+        $this->expectExceptionClass(CircularReferenceException::class);
         $serializard->serialize($var, $format);
     }
 
@@ -121,12 +124,12 @@ final class SerializardTest extends AbstractTestCase
         $user->addTag(new FakeTag(11, 'xyz'));
         $user->addTag(new FakeTag(12, 'rnd'));
 
-        return array(
-            array($user, 'xml'),
-            array($user, 'json'),
-            array($user, 'yaml'),
-            array($user, 'array'),
-        );
+        return [
+            [$user, 'xml'],
+            [$user, 'json'],
+            [$user, 'yaml'],
+            [$user, 'array'],
+        ];
     }
 
     private function getSerializard()
@@ -134,10 +137,10 @@ final class SerializardTest extends AbstractTestCase
         $normalizers = new FallbackNormalizerContainer();
         $normalizers->add(FakeUser::class, new ReflectionNormalizer());
         $normalizers->add(FakeTag::class, function(FakeTag $tag) {
-            return array(
+            return [
                 'id' => $tag->getId(),
                 'name' => $tag->getName(),
-            );
+            ];
         });
 
         $hydrators = new FallbackHydratorContainer();
@@ -244,26 +247,26 @@ final class SerializardTest extends AbstractTestCase
 
         $normalizers = new FallbackNormalizerContainer();
         $normalizers->add(FakeArticle::class, function(FakeArticle $article, NormalizerContextInterface $context) {
-            return array(
+            return [
                 'id' => $article->getId(),
                 'title' => $article->getTitle(),
                 'user' => $article->getUser(),
                 'tag' => $article->getTag(),
-            );
+            ];
         });
         $normalizers->add(FakeUser::class, function(FakeUser $user, NormalizerContextInterface $context) {
-            return array(
+            return [
                 'id' => $user->getId(),
                 'name' => $user->getName(),
                 'tag' => $user->getTag(),
                 'tags' => $user->getTags(),
-            );
+            ];
         });
         $normalizers->add(FakeTag::class, function(FakeTag $tag, NormalizerContextInterface $context) {
-            return array(
+            return [
                 'id' => $tag->getId(),
                 'name' => $tag->getName(),
-            );
+            ];
         });
 
         $serializard = new Serializard($formats, $normalizers, $hydrators);
@@ -284,20 +287,20 @@ final class SerializardTest extends AbstractTestCase
         $formats->add('json', new JsonFormat());
 
         $hydrators = new FallbackHydratorContainer();
-        $hydrators->add(FakeArticle::class, new ReflectionHydrator(FakeArticle::class, array(
+        $hydrators->add(FakeArticle::class, new ReflectionHydrator(FakeArticle::class, [
             'user' => FakeUser::class,
             'tag' => FakeTag::class,
-        )));
-        $hydrators->add(FakeUser::class, new ReflectionHydrator(FakeUser::class, array(
+        ]));
+        $hydrators->add(FakeUser::class, new ReflectionHydrator(FakeUser::class, [
             'tag' => FakeTag::class,
             'tags' => FakeTag::class.'[]',
-        )));
-        $hydrators->add(FakeTag::class, new ReflectionHydrator(FakeTag::class, array()));
+        ]));
+        $hydrators->add(FakeTag::class, new ReflectionHydrator(FakeTag::class, []));
 
         $normalizers = new FallbackNormalizerContainer();
         $normalizers->add(FakeArticle::class, new ReflectionNormalizer());
         $normalizers->add(FakeUser::class, new ReflectionNormalizer());
-        $normalizers->add(FakeTag::class, new ReflectionNormalizer(array('user')));
+        $normalizers->add(FakeTag::class, new ReflectionNormalizer(['user']));
 
         $serializard = new Serializard($formats, $normalizers, $hydrators);
 
@@ -315,19 +318,19 @@ final class SerializardTest extends AbstractTestCase
 
     public function testInvalidSerializationFormat()
     {
-        $this->expectExceptionClass(\RuntimeException::class);
+        $this->expectExceptionClass(FormatNotFoundException::class);
         $this->getSerializard()->serialize(new \stdClass(), 'invalid');
     }
 
     public function testInvalidUnserializationFormat()
     {
-        $this->expectExceptionClass(\RuntimeException::class);
+        $this->expectExceptionClass(FormatNotFoundException::class);
         $this->getSerializard()->unserialize(new \stdClass(), \stdClass::class, 'invalid');
     }
 
     public function testMissingClassSerializationHandler()
     {
-        $this->expectExceptionClass(\RuntimeException::class);
+        $this->expectExceptionClass(NormalizerNotFoundException::class);
         $this->getSerializard()->serialize(new \stdClass(), 'json');
     }
 }

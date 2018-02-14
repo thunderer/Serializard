@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Serializard\Format;
 
+use Thunder\Serializard\Exception\CircularReferenceException;
 use Thunder\Serializard\NormalizerContainer\NormalizerContainerInterface as Normalizers;
 use Thunder\Serializard\HydratorContainer\HydratorContainerInterface as Hydrators;
 use Thunder\Serializard\NormalizerContext\NormalizerContextInterface;
@@ -23,7 +24,7 @@ final class XmlFormat implements FormatInterface
         return $this->doSerialize($var, $normalizers, $context);
     }
 
-    private function doSerialize($var, Normalizers $normalizers, NormalizerContextInterface $context, \DOMNode $doc = null, $parent = null, $key = null, array $state = array(), array $classes = array())
+    private function doSerialize($var, Normalizers $normalizers, NormalizerContextInterface $context, \DOMNode $doc = null, $parent = null, $key = null, array $state = [], array $classes = [])
     {
         $isRoot = ($doc === null);
         $doc = $doc ?: new \DOMDocument('1.0', 'utf-8');
@@ -35,7 +36,7 @@ final class XmlFormat implements FormatInterface
         return $isRoot ? $doc->saveXML() : null;
     }
 
-    private function serializeValue($var, Normalizers $normalizers, NormalizerContextInterface $context, \DOMNode $doc, $parent, $key, array $state = array(), array $classes = array())
+    private function serializeValue($var, Normalizers $normalizers, NormalizerContextInterface $context, \DOMNode $doc, $parent, $key, array $state = [], array $classes = [])
     {
         /** @var \DOMDocument|\DOMElement $doc */
         /** @var \DOMDocument|\DOMElement $parent */
@@ -46,7 +47,7 @@ final class XmlFormat implements FormatInterface
             $hash = spl_object_hash($var);
             $classes[] = get_class($var);
             if(isset($state[$hash])) {
-                throw new \RuntimeException('Nesting cycle: '.implode(' -> ', $classes));
+                throw new CircularReferenceException('Nesting cycle: '.implode(' -> ', $classes));
             }
             $state[$hash] = 1;
 
@@ -80,10 +81,10 @@ final class XmlFormat implements FormatInterface
 
     private function parse(\DOMDocument $doc, $parent = null)
     {
-        $ret = array();
+        $ret = [];
         /** @var \DOMElement $parent */
         /** @var \DOMElement $node */
-        $tags = array();
+        $tags = [];
         foreach($parent->childNodes as $node) {
             if($node->nodeName === '#text') {
                 continue;
@@ -95,7 +96,7 @@ final class XmlFormat implements FormatInterface
             $result = $this->parse($doc, $node);
             if(array_key_exists($node->tagName, $ret)) {
                 $tags[] = $node->tagName;
-                $ret = array($ret[$node->tagName]);
+                $ret = [$ret[$node->tagName]];
                 $ret[] = $result;
                 continue;
             }

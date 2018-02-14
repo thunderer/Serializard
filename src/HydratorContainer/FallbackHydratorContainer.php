@@ -1,19 +1,24 @@
 <?php
 namespace Thunder\Serializard\HydratorContainer;
 
+use Thunder\Serializard\Exception\HydratorConflictException;
+use Thunder\Serializard\Exception\HydratorNotFoundException;
+use Thunder\Serializard\Exception\InvalidClassNameException;
+use Thunder\Serializard\Exception\InvalidHydratorException;
+
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 final class FallbackHydratorContainer implements HydratorContainerInterface
 {
-    private $handlers = array();
-    private $interfaces = array();
-    private $aliases = array();
+    private $handlers = [];
+    private $interfaces = [];
+    private $aliases = [];
 
     public function add($class, $handler)
     {
         if(false === is_callable($handler)) {
-            throw new \RuntimeException(sprintf('Invalid handler for class %s!', $class));
+            throw new InvalidHydratorException(sprintf('Invalid handler for class %s!', $class));
         }
 
         if(class_exists($class)) {
@@ -23,7 +28,7 @@ final class FallbackHydratorContainer implements HydratorContainerInterface
             $this->aliases[$class] = $class;
             $this->interfaces[$class] = $handler;
         } else {
-            throw new \RuntimeException(sprintf('Given value %s is neither class nor interface name!', $class));
+            throw new InvalidClassNameException(sprintf('Given value %s is neither class nor interface name!', $class));
         }
     }
 
@@ -32,7 +37,7 @@ final class FallbackHydratorContainer implements HydratorContainerInterface
         $handler = $this->getHandler($class);
 
         if(null === $handler) {
-            throw new \RuntimeException(sprintf('Handler for class %s does not exist!', $class));
+            throw new HydratorNotFoundException(sprintf('Handler for class %s does not exist!', $class));
         }
 
         $this->handlers[$alias] = $handler;
@@ -53,7 +58,7 @@ final class FallbackHydratorContainer implements HydratorContainerInterface
         $interfaces = array_intersect(array_keys($this->interfaces), array_values(class_implements($class)));
         if($interfaces) {
             if(count($interfaces) > 1) {
-                throw new \RuntimeException(sprintf('Class %s implements interfaces with colliding handlers!', $class));
+                throw new HydratorConflictException(sprintf('Class %s implements interfaces with colliding handlers!', $class));
             }
 
             return $this->interfaces[array_shift($interfaces)];

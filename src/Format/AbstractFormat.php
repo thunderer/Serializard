@@ -1,6 +1,9 @@
 <?php
 namespace Thunder\Serializard\Format;
 
+use Thunder\Serializard\Exception\CircularReferenceException;
+use Thunder\Serializard\Exception\HydratorNotFoundException;
+use Thunder\Serializard\Exception\NormalizerNotFoundException;
 use Thunder\Serializard\HydratorContainer\HydratorContainerInterface as Hydrators;
 use Thunder\Serializard\NormalizerContainer\NormalizerContainerInterface as Normalizers;
 use Thunder\Serializard\NormalizerContext\NormalizerContextInterface;
@@ -10,20 +13,20 @@ use Thunder\Serializard\NormalizerContext\NormalizerContextInterface;
  */
 abstract class AbstractFormat implements FormatInterface
 {
-    protected function doSerialize($var, Normalizers $handlers, NormalizerContextInterface $context, array $state = array(), array $classes = array())
+    protected function doSerialize($var, Normalizers $handlers, NormalizerContextInterface $context, array $state = [], array $classes = [])
     {
         if(is_object($var)) {
             $class = get_class($var);
             $handler = $handlers->getHandler($class);
 
             if(null === $handler) {
-                throw new \RuntimeException(sprintf('No serialization handler for class %s!', $class));
+                throw new NormalizerNotFoundException(sprintf('No serialization handler for class %s.', $class));
             }
 
             $hash = spl_object_hash($var);
             $classes[] = get_class($var);
             if(isset($state[$hash])) {
-                throw new \RuntimeException('Nesting cycle: '.implode(' -> ', $classes));
+                throw new CircularReferenceException('Nesting cycle: '.implode(' -> ', $classes));
             }
             $state[$hash] = 1;
 
@@ -31,7 +34,7 @@ abstract class AbstractFormat implements FormatInterface
         }
 
         if(is_array($var)) {
-            $return = array();
+            $return = [];
             foreach($var as $key => $value) {
                 $return[$key] = $this->doSerialize($value, $handlers, $context, $state, $classes);
             }
@@ -48,7 +51,7 @@ abstract class AbstractFormat implements FormatInterface
     {
         $handler = $hydrators->getHandler($class);
         if(null === $handler) {
-            throw new \RuntimeException(sprintf('No unserialization handler for class %s!', $class));
+            throw new HydratorNotFoundException(sprintf('No hydrator for class %s.', $class));
         }
 
         return $handler($var, $hydrators);

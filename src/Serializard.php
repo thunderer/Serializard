@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Serializard;
 
+use Thunder\Serializard\Exception\FormatNotFoundException;
 use Thunder\Serializard\Format\FormatInterface;
 use Thunder\Serializard\FormatContainer\FormatContainerInterface as Formats;
 use Thunder\Serializard\HydratorContainer\HydratorContainerInterface as Hydrators;
@@ -47,7 +48,7 @@ final class Serializard
         $format = $this->formats->get($alias);
 
         if(false === $format instanceof FormatInterface) {
-            throw new \RuntimeException(sprintf('No registered format for alias %s!', $alias));
+            throw new FormatNotFoundException(sprintf('No registered format for alias %s.', $alias));
         }
 
         return $format;

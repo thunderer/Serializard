@@ -15,40 +15,35 @@ This library is available on Composer/Packagist as `thunderer/serializard`.
 
 # Usage
 
-Examples in this section use this class:
+Let's consider a simple User class with two properties and some setup code:
 
 ```php
-class User
+final class User
 {
     private $id;
     private $name;
 
-    public function __construct($id, $name)
-    {
-        $this->id = $id;
-        $this->name = $name;
-    }
+    public function __construct(int $id, string $name) { /* ... */ }
 
     public function getId() { return $this->id; }
     public function getName() { return $this->name; }
 }
-```
 
-## Serialization
-
-Serialization is controlled by registering callables used in normalization phase:
-
-```php
-use Thunder\Serializard\Format\JsonFormat;
-use Thunder\Serializard\FormatContainer\FormatContainer;
-use Thunder\Serializard\HydratorContainer\FallbackHydratorContainer;
-use Thunder\Serializard\NormalizerContainer\FallbackNormalizerContainer;
-use Thunder\Serializard\Serializard;
+$user = new User(1, 'Thomas');
 
 $formats = new FormatContainer();
 $formats->add('json', new JsonFormat());
 
+$hydrators = new FallbackHydratorContainer();
 $normalizers = new FallbackNormalizerContainer();
+$serializard = new Serializard($formats, $normalizers, $hydrators);
+```
+
+## Serialization
+
+Serialization is controlled by registering handlers used in normalization phase:
+
+```php
 $normalizers->add(User::class, function(User $user) {
     return [
         'id' => $user->getId(),
@@ -56,16 +51,8 @@ $normalizers->add(User::class, function(User $user) {
     ];
 });
 
-$hydrators = new FallbackHydratorContainer();
-
-$serializard = new Serializard($formats, $normalizers, $hydrators);
-echo $serializard->serialize(new User(1, 'Thomas'), 'json');
-```
-
-The result is:
-
-```
-{"id":1,"name":"Thomas"}
+$result = $serializard->serialize($user, 'json');
+// result is {"id":1,"name":"Thomas"}
 ```
 
 ## Unserialization
@@ -73,41 +60,15 @@ The result is:
 Unserialization can be controlled by registering callables able to reconstruct objects from data parsed from input text:
 
 ```php
-use Thunder\Serializard\Format\JsonFormat;
-use Thunder\Serializard\FormatContainer\FormatContainer;
-use Thunder\Serializard\HydratorContainer\FallbackHydratorContainer;
-use Thunder\Serializard\NormalizerContainer\FallbackNormalizerContainer;
-use Thunder\Serializard\Serializard;
-
-$formats = new FormatContainer();
-$formats->add('json', new JsonFormat());
-
-$normalizers = new FallbackNormalizerContainer();
-
-$hydrators = new FallbackHydratorContainer();
 $hydrators->add(User::class, function(array $data) {
     return new User($data['id'], $data['name']);
 });
 
-$serializard = new Serializard($formats, $normalizers, $hydrators);
 $json = '{"id":1,"name":"Thomas"}';
-var_dump($serializard->unserialize($json, User::class, 'json'));
-```
-
-The result is:
-
-```
-class User#9 (2) {
-  private $id =>
-  int(1)
-  private $name =>
-  string(6) "Thomas"
-}
+$user = $serializard->unserialize($json, User::class, 'json');
 ```
 
 # Formats
-
-Several formats are supported as classes in `Thunder\Serializard\Format`:
 
 - **JSON** in `JsonFormat` converts objects to JSON,
 - **Array** in `ArrayFormat` just returns object graph normalized to arrays of scalars,

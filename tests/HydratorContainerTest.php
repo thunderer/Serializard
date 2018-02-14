@@ -1,6 +1,10 @@
 <?php
 namespace Thunder\Serializard\Tests;
 
+use Thunder\Serializard\Exception\HydratorConflictException;
+use Thunder\Serializard\Exception\HydratorNotFoundException;
+use Thunder\Serializard\Exception\InvalidClassNameException;
+use Thunder\Serializard\Exception\InvalidHydratorException;
 use Thunder\Serializard\HydratorContainer\FallbackHydratorContainer;
 use Thunder\Serializard\Tests\Fake\FakeUser;
 use Thunder\Serializard\Tests\Fake\FakeUserParent;
@@ -51,28 +55,28 @@ final class HydratorContainerTest extends AbstractTestCase
         $hydrators->add(TypeInterface::class, function() { return 'multiple'; });
         $hydrators->add(AnotherTypeInterface::class, function() { return 'multiple'; });
 
-        $this->expectExceptionClass(\RuntimeException::class);
+        $this->expectExceptionClass(HydratorConflictException::class);
         $hydrators->getHandler(TypeMultiple::class);
     }
 
     public function testInvalidClassOrInterfaceName()
     {
         $handlers = new FallbackHydratorContainer();
-        $this->expectExceptionClass(\RuntimeException::class);
+        $this->expectExceptionClass(InvalidClassNameException::class);
         $handlers->add('invalid', function() {});
     }
 
     public function testAliasForInvalidClass()
     {
         $handlers = new FallbackHydratorContainer();
-        $this->expectExceptionClass(\RuntimeException::class);
+        $this->expectExceptionClass(HydratorNotFoundException::class);
         $handlers->addAlias(\stdClass::class, \DateTime::class);
     }
 
     public function testInvalidHandler()
     {
         $handlers = new FallbackHydratorContainer();
-        $this->expectExceptionClass(\RuntimeException::class);
+        $this->expectExceptionClass(InvalidHydratorException::class);
         $handlers->add(\stdClass::class, 'invalid');
     }
 }

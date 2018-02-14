@@ -38,7 +38,7 @@ final class JmsYamlNormalizer
 
         $ref = new \ReflectionObject($var);
         $result = [];
-        $properties = array_key_exists('properties', $yaml) ? $yaml['properties'] : array();
+        $properties = array_key_exists('properties', $yaml) ? $yaml['properties'] : [];
         foreach($properties as $key => $config) {
             if($config['expose'] !== true) {
                 continue;
@@ -65,7 +65,7 @@ final class JmsYamlNormalizer
             // no method or property found, skip current key
         }
 
-        $virtual = array_key_exists('virtual_properties', $yaml) ? $yaml['virtual_properties'] : array();
+        $virtual = array_key_exists('virtual_properties', $yaml) ? $yaml['virtual_properties'] : [];
         foreach($virtual as $method => $config) {
             $result[$config['serialized_name']] = $var->{$method}();
         }

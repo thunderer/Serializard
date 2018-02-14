@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Serializard\Format;
 
+use Thunder\Serializard\Exception\SerializationFailureException;
 use Thunder\Serializard\NormalizerContainer\NormalizerContainerInterface as Normalizers;
 use Thunder\Serializard\HydratorContainer\HydratorContainerInterface as Hydrators;
 use Thunder\Serializard\NormalizerContext\NormalizerContextInterface;
@@ -15,7 +16,7 @@ final class JsonFormat extends AbstractFormat
         $json = @json_encode($this->doSerialize($var, $normalizers, $context));
 
         if(json_last_error() !== JSON_ERROR_NONE) {
-            throw new \RuntimeException(sprintf('JSON serialization failure: `%s`!', json_last_error_msg()));
+            throw new SerializationFailureException(sprintf('JSON serialization failure: `%s`!', json_last_error_msg()));
         }
 
         return $json;

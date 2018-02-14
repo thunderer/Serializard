@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Serializard\Format;
 
+use Thunder\Serializard\Exception\UnserializationFailureException;
 use Thunder\Serializard\HydratorContainer\HydratorContainerInterface as Hydrators;
 use Thunder\Serializard\NormalizerContainer\NormalizerContainerInterface as Normalizers;
 use Thunder\Serializard\NormalizerContext\NormalizerContextInterface;
@@ -18,7 +19,7 @@ final class ArrayFormat extends AbstractFormat
     public function unserialize($var, $class, Hydrators $hydrators)
     {
         if(false === is_array($var)) {
-            throw new \RuntimeException('ArrayFormat can unserialize only arrays!');
+            throw new UnserializationFailureException('ArrayFormat can unserialize only arrays!');
         }
 
         return $this->doUnserialize($var, $class, $hydrators);

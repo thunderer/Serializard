@@ -1,6 +1,10 @@
 <?php
 namespace Thunder\Serializard\Tests;
 
+use Thunder\Serializard\Exception\InvalidClassNameException;
+use Thunder\Serializard\Exception\InvalidNormalizerException;
+use Thunder\Serializard\Exception\NormalizerConflictException;
+use Thunder\Serializard\Exception\NormalizerNotFoundException;
 use Thunder\Serializard\NormalizerContainer\FallbackNormalizerContainer;
 use Thunder\Serializard\Tests\Fake\FakeUser;
 use Thunder\Serializard\Tests\Fake\FakeUserParent;
@@ -51,7 +55,7 @@ final class NormalizerContainerTest extends AbstractTestCase
         $normalizers->add(TypeInterface::class, function() { return 'multiple'; });
         $normalizers->add(AnotherTypeInterface::class, function() { return 'multiple'; });
 
-        $this->expectExceptionClass(\RuntimeException::class);
+        $this->expectExceptionClass(NormalizerConflictException::class);
         $normalizers->getHandler(TypeMultiple::class);
     }
 
@@ -82,28 +86,28 @@ final class NormalizerContainerTest extends AbstractTestCase
     public function testExceptionOnInvalidDefaultHandler()
     {
         $normalizers = new FallbackNormalizerContainer();
-        $this->expectExceptionClass(\InvalidArgumentException::class);
+        $this->expectExceptionClass(InvalidNormalizerException::class);
         $normalizers->setDefault('invalid');
     }
 
     public function testInvalidClassOrInterfaceName()
     {
         $normalizers = new FallbackNormalizerContainer();
-        $this->expectExceptionClass(\RuntimeException::class);
+        $this->expectExceptionClass(InvalidClassNameException::class);
         $normalizers->add('invalid', function() {});
     }
 
     public function testAliasForInvalidClass()
     {
         $normalizers = new FallbackNormalizerContainer();
-        $this->expectExceptionClass(\RuntimeException::class);
+        $this->expectExceptionClass(NormalizerNotFoundException::class);
         $normalizers->addAlias(\stdClass::class, \DateTime::class);
     }
 
     public function testInvalidHandler()
     {
         $normalizers = new FallbackNormalizerContainer();
-        $this->expectExceptionClass(\RuntimeException::class);
+        $this->expectExceptionClass(InvalidNormalizerException::class);
         $normalizers->add(\stdClass::class, 'invalid');
     }
 }
