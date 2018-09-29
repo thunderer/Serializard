@@ -1,8 +1,6 @@
 <?php
 namespace Thunder\Serializard;
 
-use Thunder\Serializard\Exception\FormatNotFoundException;
-use Thunder\Serializard\Format\FormatInterface;
 use Thunder\Serializard\FormatContainer\FormatContainerInterface as Formats;
 use Thunder\Serializard\HydratorContainer\HydratorContainerInterface as Hydrators;
 use Thunder\Serializard\NormalizerContainer\NormalizerContainerInterface as Normalizers;
@@ -28,12 +26,12 @@ final class Serializard
 
     public function serialize($var, $format, NormalizerContextInterface $context = null)
     {
-        return $this->getFormat($format)->serialize($var, $this->normalizers, $this->getNormalizerContext($context, $var, $format));
+        return $this->formats->get($format)->serialize($var, $this->normalizers, $this->getNormalizerContext($context, $var, $format));
     }
 
     public function unserialize($var, $class, $format)
     {
-        return $this->getFormat($format)->unserialize($var, $class, $this->hydrators);
+        return $this->formats->get($format)->unserialize($var, $class, $this->hydrators);
     }
 
     private function getNormalizerContext(NormalizerContextInterface $context = null, $var, $format)
@@ -41,16 +39,5 @@ final class Serializard
         $context = $context ?: new ParentNormalizerContext();
 
         return $context->withRoot($var)->withFormat($format);
-    }
-
-    private function getFormat($alias)
-    {
-        $format = $this->formats->get($alias);
-
-        if(false === $format instanceof FormatInterface) {
-            throw new FormatNotFoundException(sprintf('No registered format for alias %s.', $alias));
-        }
-
-        return $format;
     }
 }

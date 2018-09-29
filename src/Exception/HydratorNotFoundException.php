@@ -6,4 +6,8 @@ namespace Thunder\Serializard\Exception;
  */
 final class HydratorNotFoundException extends AbstractSerializardException
 {
+    public static function fromClass($class)
+    {
+        return new self(sprintf('No hydrator for class %s.', $class));
+    }
 }

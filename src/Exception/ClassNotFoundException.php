@@ -6,4 +6,8 @@ namespace Thunder\Serializard\Exception;
  */
 final class ClassNotFoundException extends AbstractSerializardException
 {
+    public static function fromClass($class)
+    {
+        return new self(sprintf('Given value %s is neither class nor interface name!', $class));
+    }
 }

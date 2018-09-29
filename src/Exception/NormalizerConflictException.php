@@ -6,4 +6,8 @@ namespace Thunder\Serializard\Exception;
  */
 final class NormalizerConflictException extends AbstractSerializardException
 {
+    public static function fromClass($class, array $interfaces)
+    {
+        return new self(sprintf('Class %s implements interfaces with colliding handlers: %s.', $class, implode(', ', $interfaces)));
+    }
 }

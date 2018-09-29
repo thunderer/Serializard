@@ -1,7 +1,6 @@
 <?php
 namespace Thunder\Serializard;
 
-use Thunder\Serializard\Exception\FormatNotFoundException;
 use Thunder\Serializard\Format\ArrayFormat;
 use Thunder\Serializard\Format\FormatInterface;
 use Thunder\Serializard\Format\JsonFormat;
@@ -55,22 +54,11 @@ final class SerializardFacade
 
     public function serialize($var, $format)
     {
-        return $this->getFormat($format)->serialize($var, $this->normalizers, new ParentNormalizerContext());
+        return $this->formats->get($format)->serialize($var, $this->normalizers, new ParentNormalizerContext());
     }
 
     public function unserialize($var, $class, $format)
     {
-        return $this->getFormat($format)->unserialize($var, $class, $this->hydrators);
-    }
-
-    private function getFormat($alias)
-    {
-        $format = $this->formats->get($alias);
-
-        if(false === $format instanceof FormatInterface) {
-            throw new FormatNotFoundException(sprintf('No registered format for alias %s.', $alias));
-        }
-
-        return $format;
+        return $this->formats->get($format)->unserialize($var, $class, $this->hydrators);
     }
 }

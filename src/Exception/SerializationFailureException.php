@@ -6,4 +6,13 @@ namespace Thunder\Serializard\Exception;
  */
 final class SerializationFailureException extends AbstractSerializardException
 {
+    public static function fromCycle(array $classes)
+    {
+        return new self('Nesting cycle: '.implode(' -> ', $classes));
+    }
+
+    public static function fromJson($msg)
+    {
+        return new self(sprintf('JSON failure: `%s`.', $msg));
+    }
 }

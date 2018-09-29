@@ -6,4 +6,8 @@ namespace Thunder\Serializard\Exception;
  */
 final class UnserializationFailureException extends AbstractSerializardException
 {
+    public static function fromClass($class)
+    {
+        return new self(sprintf('Class %s does not exist.', $class));
+    }
 }

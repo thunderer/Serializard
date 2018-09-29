@@ -1,9 +1,9 @@
 <?php
 namespace Thunder\Serializard\Tests;
 
-use Thunder\Serializard\Exception\CircularReferenceException;
 use Thunder\Serializard\Exception\FormatNotFoundException;
 use Thunder\Serializard\Exception\NormalizerNotFoundException;
+use Thunder\Serializard\Exception\SerializationFailureException;
 use Thunder\Serializard\Format\ArrayFormat;
 use Thunder\Serializard\Format\JsonFormat;
 use Thunder\Serializard\Format\XmlFormat;
@@ -113,7 +113,7 @@ final class SerializardTest extends AbstractTestCase
 
         $serializard = new Serializard($formats, $normalizers, $hydrators);
 
-        $this->expectExceptionClass(CircularReferenceException::class);
+        $this->expectExceptionClass(SerializationFailureException::class);
         $serializard->serialize($var, $format);
     }
 

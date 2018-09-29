@@ -1,7 +1,7 @@
 <?php
 namespace Thunder\Serializard\Format;
 
-use Thunder\Serializard\Exception\CircularReferenceException;
+use Thunder\Serializard\Exception\SerializationFailureException;
 use Thunder\Serializard\NormalizerContainer\NormalizerContainerInterface as Normalizers;
 use Thunder\Serializard\HydratorContainer\HydratorContainerInterface as Hydrators;
 use Thunder\Serializard\NormalizerContext\NormalizerContextInterface;
@@ -48,7 +48,7 @@ final class XmlFormat implements FormatInterface
             $hash = spl_object_hash($var);
             $classes[] = $class;
             if(isset($state[$hash])) {
-                throw new CircularReferenceException('Nesting cycle: '.implode(' -> ', $classes));
+                throw SerializationFailureException::fromCycle($classes);
             }
             $state[$hash] = 1;
 

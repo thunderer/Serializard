@@ -24,17 +24,13 @@ final class FallbackNormalizerContainer implements NormalizerContainerInterface
             $this->aliases[$class] = $class;
             $this->interfaces[$class] = $handler;
         } else {
-            throw new ClassNotFoundException(sprintf('Given value %s is neither class nor interface name!', $class));
+            throw ClassNotFoundException::fromClass($class);
         }
     }
 
     public function addAlias($alias, $class)
     {
         $handler = $this->getHandler($class);
-
-        if(null === $handler) {
-            throw new NormalizerNotFoundException(sprintf('Handler for class %s does not exist!', $class));
-        }
 
         $this->handlers[$alias] = $handler;
         $this->aliases[$alias] = $this->aliases[$class];
@@ -54,10 +50,14 @@ final class FallbackNormalizerContainer implements NormalizerContainerInterface
         $interfaces = array_intersect(array_keys($this->interfaces), array_values(class_implements($class)));
         if($interfaces) {
             if(\count($interfaces) > 1) {
-                throw new NormalizerConflictException(sprintf('Class %s implements interfaces with colliding handlers!', $class));
+                throw NormalizerConflictException::fromClass($class, $interfaces);
             }
 
             return $this->interfaces[array_shift($interfaces)];
+        }
+
+        if(null === $this->default) {
+            throw NormalizerNotFoundException::fromClass($class);
         }
 
         return $this->default;

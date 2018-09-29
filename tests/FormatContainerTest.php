@@ -1,7 +1,6 @@
 <?php
 namespace Thunder\Serializard\Tests;
 
-use Thunder\Serializard\Exception\FormatAliasTypeException;
 use Thunder\Serializard\Format\ArrayFormat;
 use Thunder\Serializard\FormatContainer\FormatContainer;
 
@@ -13,7 +12,7 @@ final class FormatContainerTest extends AbstractTestCase
     public function testExceptionOnInvalidFormatAlias()
     {
         $formats = new FormatContainer();
-        $this->expectExceptionClass(FormatAliasTypeException::class);
+        $this->expectExceptionClass(\InvalidArgumentException::class);
         $formats->add(new \stdClass(), new ArrayFormat());
     }
 }

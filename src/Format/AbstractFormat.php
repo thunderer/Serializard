@@ -1,9 +1,7 @@
 <?php
 namespace Thunder\Serializard\Format;
 
-use Thunder\Serializard\Exception\CircularReferenceException;
-use Thunder\Serializard\Exception\HydratorNotFoundException;
-use Thunder\Serializard\Exception\NormalizerNotFoundException;
+use Thunder\Serializard\Exception\SerializationFailureException;
 use Thunder\Serializard\HydratorContainer\HydratorContainerInterface as Hydrators;
 use Thunder\Serializard\NormalizerContainer\NormalizerContainerInterface as Normalizers;
 use Thunder\Serializard\NormalizerContext\NormalizerContextInterface;
@@ -20,14 +18,10 @@ abstract class AbstractFormat implements FormatInterface
             // FIXME consider local handler cache to improve performance (solve parent class fallback issue)
             $handler = $handlers->getHandler($class);
 
-            if(null === $handler) {
-                throw new NormalizerNotFoundException(sprintf('No serialization handler for class %s.', $class));
-            }
-
             $hash = spl_object_hash($var);
             $classes[] = $class;
             if(isset($state[$hash])) {
-                throw new CircularReferenceException('Nesting cycle: '.implode(' -> ', $classes));
+                throw SerializationFailureException::fromCycle($classes);
             }
             $state[$hash] = 1;
 
@@ -50,11 +44,6 @@ abstract class AbstractFormat implements FormatInterface
 
     protected function doUnserialize($var, $class, Hydrators $hydrators)
     {
-        $handler = $hydrators->getHandler($class);
-        if(null === $handler) {
-            throw new HydratorNotFoundException(sprintf('No hydrator for class %s.', $class));
-        }
-
-        return $handler($var, $hydrators);
+        return \call_user_func($hydrators->getHandler($class), $var, $hydrators);
     }
 }

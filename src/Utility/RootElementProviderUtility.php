@@ -1,8 +1,6 @@
 <?php
 namespace Thunder\Serializard\Utility;
 
-use Thunder\Serializard\Exception\ClassNotFoundException;
-
 final class RootElementProviderUtility
 {
     private $aliases;
@@ -11,7 +9,7 @@ final class RootElementProviderUtility
     {
         foreach($aliases as $key => $alias) {
             if(false === \is_string($key)) {
-                throw new ClassNotFoundException('Invalid alias class name, string required.');
+                throw new \InvalidArgumentException('Invalid alias class name, string required.');
             }
             if(false === \is_string($alias)) {
                 throw new \InvalidArgumentException(sprintf('Invalid alias for class %s, string required.', $key));
