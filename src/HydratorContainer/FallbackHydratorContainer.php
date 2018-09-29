@@ -4,7 +4,6 @@ namespace Thunder\Serializard\HydratorContainer;
 use Thunder\Serializard\Exception\HydratorConflictException;
 use Thunder\Serializard\Exception\HydratorNotFoundException;
 use Thunder\Serializard\Exception\InvalidClassNameException;
-use Thunder\Serializard\Exception\InvalidHydratorException;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -15,12 +14,8 @@ final class FallbackHydratorContainer implements HydratorContainerInterface
     private $interfaces = [];
     private $aliases = [];
 
-    public function add($class, $handler)
+    public function add($class, callable $handler)
     {
-        if(false === is_callable($handler)) {
-            throw new InvalidHydratorException(sprintf('Invalid handler for class %s!', $class));
-        }
-
         if(class_exists($class)) {
             $this->aliases[$class] = $class;
             $this->handlers[$class] = $handler;

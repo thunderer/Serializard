@@ -2,7 +2,6 @@
 namespace Thunder\Serializard\NormalizerContainer;
 
 use Thunder\Serializard\Exception\InvalidClassNameException;
-use Thunder\Serializard\Exception\InvalidNormalizerException;
 use Thunder\Serializard\Exception\NormalizerConflictException;
 use Thunder\Serializard\Exception\NormalizerNotFoundException;
 
@@ -16,12 +15,8 @@ final class FallbackNormalizerContainer implements NormalizerContainerInterface
     private $interfaces = [];
     private $aliases = [];
 
-    public function add($class, $handler)
+    public function add($class, callable $handler)
     {
-        if(false === is_callable($handler)) {
-            throw new InvalidNormalizerException(sprintf('Invalid handler for class %s!', $class));
-        }
-
         if(class_exists($class)) {
             $this->aliases[$class] = $class;
             $this->handlers[$class] = $handler;
@@ -68,12 +63,8 @@ final class FallbackNormalizerContainer implements NormalizerContainerInterface
         return $this->default;
     }
 
-    public function setDefault($handler)
+    public function setDefault(callable $handler)
     {
-        if(false === is_callable($handler)) {
-            throw new InvalidNormalizerException('Default normalizer handler must be callable!');
-        }
-
         $this->default = $handler;
     }
 

@@ -2,7 +2,6 @@
 namespace Thunder\Serializard\Tests;
 
 use Thunder\Serializard\Exception\InvalidClassNameException;
-use Thunder\Serializard\Exception\InvalidNormalizerException;
 use Thunder\Serializard\Exception\NormalizerConflictException;
 use Thunder\Serializard\Exception\NormalizerNotFoundException;
 use Thunder\Serializard\NormalizerContainer\FallbackNormalizerContainer;
@@ -83,13 +82,6 @@ final class NormalizerContainerTest extends AbstractTestCase
         $this->assertSame($fallback, $normalizers->getHandler(\DateTimeImmutable::class));
     }
 
-    public function testExceptionOnInvalidDefaultHandler()
-    {
-        $normalizers = new FallbackNormalizerContainer();
-        $this->expectExceptionClass(InvalidNormalizerException::class);
-        $normalizers->setDefault('invalid');
-    }
-
     public function testInvalidClassOrInterfaceName()
     {
         $normalizers = new FallbackNormalizerContainer();
@@ -102,12 +94,5 @@ final class NormalizerContainerTest extends AbstractTestCase
         $normalizers = new FallbackNormalizerContainer();
         $this->expectExceptionClass(NormalizerNotFoundException::class);
         $normalizers->addAlias(\stdClass::class, \DateTime::class);
-    }
-
-    public function testInvalidHandler()
-    {
-        $normalizers = new FallbackNormalizerContainer();
-        $this->expectExceptionClass(InvalidNormalizerException::class);
-        $normalizers->add(\stdClass::class, 'invalid');
     }
 }
