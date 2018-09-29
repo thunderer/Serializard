@@ -14,7 +14,7 @@ final class FormatContainer implements FormatContainerInterface
 
     public function add($alias, FormatInterface $handler)
     {
-        if(false === is_string($alias)) {
+        if(false === \is_string($alias)) {
             throw new InvalidFormatAliasException('Format alias must be a string.');
         }
         if(array_key_exists($alias, $this->formats)) {

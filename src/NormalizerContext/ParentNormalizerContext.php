@@ -15,12 +15,9 @@ final class ParentNormalizerContext implements NormalizerContextInterface
 
     public function withRoot($root)
     {
-        $context = new self();
+        $context = clone $this;
 
         $context->root = $root;
-        $context->format = $this->format;
-        $context->parent = $this->parent;
-        $context->level = $this->level;
 
         return $context;
     }
@@ -32,12 +29,9 @@ final class ParentNormalizerContext implements NormalizerContextInterface
 
     public function withFormat($format)
     {
-        $context = new self();
+        $context = clone $this;
 
-        $context->root = $this->root;
         $context->format = $format;
-        $context->parent = $this->parent;
-        $context->level = $this->level;
 
         return $context;
     }
@@ -49,10 +43,8 @@ final class ParentNormalizerContext implements NormalizerContextInterface
 
     public function withParent($parent)
     {
-        $context = new self();
+        $context = clone $this;
 
-        $context->root = $this->root;
-        $context->format = $this->format;
         $context->parent = $parent;
         $context->level = $this->level + 1;
 

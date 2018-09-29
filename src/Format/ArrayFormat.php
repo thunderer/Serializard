@@ -18,7 +18,7 @@ final class ArrayFormat extends AbstractFormat
 
     public function unserialize($var, $class, Hydrators $hydrators)
     {
-        if(false === is_array($var)) {
+        if(false === \is_array($var)) {
             throw new UnserializationFailureException('ArrayFormat can unserialize only arrays!');
         }
 

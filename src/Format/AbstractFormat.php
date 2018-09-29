@@ -15,8 +15,9 @@ abstract class AbstractFormat implements FormatInterface
 {
     protected function doSerialize($var, Normalizers $handlers, NormalizerContextInterface $context, array $state = [], array $classes = [])
     {
-        if(is_object($var)) {
-            $class = get_class($var);
+        if(\is_object($var)) {
+            $class = \get_class($var);
+            // FIXME consider local handler cache to improve performance (solve parent class fallback issue)
             $handler = $handlers->getHandler($class);
 
             if(null === $handler) {
@@ -24,7 +25,7 @@ abstract class AbstractFormat implements FormatInterface
             }
 
             $hash = spl_object_hash($var);
-            $classes[] = get_class($var);
+            $classes[] = $class;
             if(isset($state[$hash])) {
                 throw new CircularReferenceException('Nesting cycle: '.implode(' -> ', $classes));
             }
@@ -33,7 +34,7 @@ abstract class AbstractFormat implements FormatInterface
             return $this->doSerialize($handler($var, $context), $handlers, $context->withParent($var), $state, $classes);
         }
 
-        if(is_array($var)) {
+        if(\is_array($var)) {
             $return = [];
             foreach($var as $key => $value) {
                 $return[$key] = $this->doSerialize($value, $handlers, $context, $state, $classes);

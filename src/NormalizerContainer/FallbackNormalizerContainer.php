@@ -42,7 +42,7 @@ final class FallbackNormalizerContainer implements NormalizerContainerInterface
 
     public function getHandler($class)
     {
-        if(array_key_exists($class, $this->handlers)) {
+        if(isset($this->handlers[$class])) {
             return $this->handlers[$class];
         }
 
@@ -53,7 +53,7 @@ final class FallbackNormalizerContainer implements NormalizerContainerInterface
 
         $interfaces = array_intersect(array_keys($this->interfaces), array_values(class_implements($class)));
         if($interfaces) {
-            if(count($interfaces) > 1) {
+            if(\count($interfaces) > 1) {
                 throw new NormalizerConflictException(sprintf('Class %s implements interfaces with colliding handlers!', $class));
             }
 

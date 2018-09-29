@@ -40,23 +40,24 @@ final class XmlFormat implements FormatInterface
     {
         /** @var \DOMDocument|\DOMElement $doc */
         /** @var \DOMDocument|\DOMElement $parent */
-        if(is_object($var)) {
-            $handler = $normalizers->getHandler(get_class($var));
+        if(\is_object($var)) {
+            $class = \get_class($var);
+            $handler = $normalizers->getHandler($class);
             $arr = $handler($var);
 
             $hash = spl_object_hash($var);
-            $classes[] = get_class($var);
+            $classes[] = $class;
             if(isset($state[$hash])) {
                 throw new CircularReferenceException('Nesting cycle: '.implode(' -> ', $classes));
             }
             $state[$hash] = 1;
 
-            $this->doSerialize($arr, $normalizers, $context->withParent($var), $doc, $parent, $this->getRoot(get_class($var)), $state, $classes);
+            $this->doSerialize($arr, $normalizers, $context->withParent($var), $doc, $parent, $this->getRoot($class), $state, $classes);
 
             return;
         }
 
-        if(is_array($var)) {
+        if(\is_array($var)) {
             $item = $key ? $doc->createElement($key) : $parent;
             foreach($var as $index => $value) {
                 $this->doSerialize($value, $normalizers, $context, $doc, $item, $index, $state, $classes);
@@ -100,7 +101,7 @@ final class XmlFormat implements FormatInterface
                 $ret[] = $result;
                 continue;
             }
-            if(in_array($node->tagName, $tags, true)) {
+            if(\in_array($node->tagName, $tags, true)) {
                 $ret[] = $result;
                 continue;
             }
@@ -112,6 +113,6 @@ final class XmlFormat implements FormatInterface
 
     private function getRoot($class)
     {
-        return call_user_func($this->rootProvider, $class);
+        return \call_user_func($this->rootProvider, $class);
     }
 }
