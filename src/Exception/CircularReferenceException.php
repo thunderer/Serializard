@@ -4,6 +4,6 @@ namespace Thunder\Serializard\Exception;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class CircularReferenceException extends \RuntimeException
+final class CircularReferenceException extends AbstractSerializardException
 {
 }

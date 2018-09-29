@@ -3,7 +3,7 @@ namespace Thunder\Serializard\Tests;
 
 use Thunder\Serializard\Exception\HydratorConflictException;
 use Thunder\Serializard\Exception\HydratorNotFoundException;
-use Thunder\Serializard\Exception\InvalidClassNameException;
+use Thunder\Serializard\Exception\ClassNotFoundException;
 use Thunder\Serializard\HydratorContainer\FallbackHydratorContainer;
 use Thunder\Serializard\Tests\Fake\FakeUser;
 use Thunder\Serializard\Tests\Fake\FakeUserParent;
@@ -61,7 +61,7 @@ final class HydratorContainerTest extends AbstractTestCase
     public function testInvalidClassOrInterfaceName()
     {
         $handlers = new FallbackHydratorContainer();
-        $this->expectExceptionClass(InvalidClassNameException::class);
+        $this->expectExceptionClass(ClassNotFoundException::class);
         $handlers->add('invalid', function() {});
     }
 

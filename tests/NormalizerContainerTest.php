@@ -1,7 +1,7 @@
 <?php
 namespace Thunder\Serializard\Tests;
 
-use Thunder\Serializard\Exception\InvalidClassNameException;
+use Thunder\Serializard\Exception\ClassNotFoundException;
 use Thunder\Serializard\Exception\NormalizerConflictException;
 use Thunder\Serializard\Exception\NormalizerNotFoundException;
 use Thunder\Serializard\NormalizerContainer\FallbackNormalizerContainer;
@@ -85,7 +85,7 @@ final class NormalizerContainerTest extends AbstractTestCase
     public function testInvalidClassOrInterfaceName()
     {
         $normalizers = new FallbackNormalizerContainer();
-        $this->expectExceptionClass(InvalidClassNameException::class);
+        $this->expectExceptionClass(ClassNotFoundException::class);
         $normalizers->add('invalid', function() {});
     }
 

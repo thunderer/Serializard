@@ -10,7 +10,7 @@ final class UtilityTest extends AbstractTestCase
 {
     public function testInvalidKey()
     {
-        $this->expectExceptionClass(\InvalidArgumentException::class);
+        $this->expectExceptionClass(\RuntimeException::class);
         new RootElementProviderUtility([0 => 'Class']);
     }
 

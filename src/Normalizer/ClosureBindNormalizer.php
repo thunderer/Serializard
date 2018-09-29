@@ -15,6 +15,6 @@ final class ClosureBindNormalizer
 
     public function __invoke($var)
     {
-        return call_user_func(\Closure::bind($this->callback, $var, $var), $var);
+        return \call_user_func(\Closure::bind($this->callback, $var, $var), $var);
     }
 }

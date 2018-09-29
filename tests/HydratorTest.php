@@ -1,7 +1,7 @@
 <?php
 namespace Thunder\Serializard\Tests;
 
-use Thunder\Serializard\Exception\InvalidClassNameException;
+use Thunder\Serializard\Exception\ClassNotFoundException;
 use Thunder\Serializard\Hydrator\ReflectionHydrator;
 
 /**
@@ -11,7 +11,7 @@ final class HydratorTest extends AbstractTestCase
 {
     public function testReflectionHydratorInvalidClass()
     {
-        $this->expectExceptionClass(InvalidClassNameException::class);
+        $this->expectExceptionClass(ClassNotFoundException::class);
         new ReflectionHydrator('invalid', []);
     }
 }

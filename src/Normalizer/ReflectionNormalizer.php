@@ -20,7 +20,7 @@ final class ReflectionNormalizer
         $result = [];
         while($ref) {
             foreach($ref->getProperties() as $property) {
-                if(in_array($property->getName(), $this->skipped, true)) {
+                if(\in_array($property->getName(), $this->skipped, true)) {
                     continue;
                 }
 

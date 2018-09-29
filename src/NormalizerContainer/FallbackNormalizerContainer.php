@@ -1,7 +1,7 @@
 <?php
 namespace Thunder\Serializard\NormalizerContainer;
 
-use Thunder\Serializard\Exception\InvalidClassNameException;
+use Thunder\Serializard\Exception\ClassNotFoundException;
 use Thunder\Serializard\Exception\NormalizerConflictException;
 use Thunder\Serializard\Exception\NormalizerNotFoundException;
 
@@ -24,7 +24,7 @@ final class FallbackNormalizerContainer implements NormalizerContainerInterface
             $this->aliases[$class] = $class;
             $this->interfaces[$class] = $handler;
         } else {
-            throw new InvalidClassNameException(sprintf('Given value %s is neither class nor interface name!', $class));
+            throw new ClassNotFoundException(sprintf('Given value %s is neither class nor interface name!', $class));
         }
     }
 

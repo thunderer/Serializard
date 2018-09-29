@@ -4,6 +4,6 @@ namespace Thunder\Serializard\Exception;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class DuplicateFormatException extends \RuntimeException
+final class ClassNotFoundException extends AbstractSerializardException
 {
 }

@@ -4,6 +4,6 @@ namespace Thunder\Serializard\Exception;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class InvalidFormatAliasException extends \InvalidArgumentException
+final class FormatAliasTypeException extends AbstractSerializardException
 {
 }

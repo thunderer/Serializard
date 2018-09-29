@@ -3,7 +3,7 @@ namespace Thunder\Serializard\HydratorContainer;
 
 use Thunder\Serializard\Exception\HydratorConflictException;
 use Thunder\Serializard\Exception\HydratorNotFoundException;
-use Thunder\Serializard\Exception\InvalidClassNameException;
+use Thunder\Serializard\Exception\ClassNotFoundException;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -23,7 +23,7 @@ final class FallbackHydratorContainer implements HydratorContainerInterface
             $this->aliases[$class] = $class;
             $this->interfaces[$class] = $handler;
         } else {
-            throw new InvalidClassNameException(sprintf('Given value %s is neither class nor interface name!', $class));
+            throw new ClassNotFoundException(sprintf('Given value %s is neither class nor interface name!', $class));
         }
     }
 
@@ -52,7 +52,7 @@ final class FallbackHydratorContainer implements HydratorContainerInterface
 
         $interfaces = array_intersect(array_keys($this->interfaces), array_values(class_implements($class)));
         if($interfaces) {
-            if(count($interfaces) > 1) {
+            if(\count($interfaces) > 1) {
                 throw new HydratorConflictException(sprintf('Class %s implements interfaces with colliding handlers!', $class));
             }
 
@@ -64,6 +64,6 @@ final class FallbackHydratorContainer implements HydratorContainerInterface
 
     public function hydrate($class, array $data)
     {
-        return call_user_func($this->getHandler($class), $data, $this);
+        return \call_user_func($this->getHandler($class), $data, $this);
     }
 }
