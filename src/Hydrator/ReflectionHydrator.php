@@ -1,6 +1,8 @@
 <?php
 namespace Thunder\Serializard\Hydrator;
 
+use Thunder\Serializard\Exception\ClassNotFoundException;
+use Thunder\Serializard\Exception\UnserializationFailureException;
 use Thunder\Serializard\HydratorContainer\HydratorContainerInterface;
 
 final class ReflectionHydrator
@@ -10,17 +12,17 @@ final class ReflectionHydrator
 
     public function __construct($class, array $objects)
     {
-        if(false === class_exists($class)) {
-            throw new \InvalidArgumentException(sprintf('Unknown hydration class %s!', $class));
-        }
-
         $this->class = $class;
         $this->objects = $objects;
     }
 
     public function __invoke(array $data, HydratorContainerInterface $hydrators)
     {
-        $ref = new \ReflectionClass($this->class);
+        try {
+            $ref = new \ReflectionClass($this->class);
+        } catch(\ReflectionException $e) {
+            throw UnserializationFailureException::fromClass($this->class);
+        }
         $object = $ref->newInstanceWithoutConstructor();
 
         foreach($ref->getProperties() as $property) {
@@ -44,13 +46,13 @@ final class ReflectionHydrator
 
         $type = $this->objects[$name];
         if('[]' !== substr($type, -2)) {
-            return call_user_func($hydrators->getHandler($this->objects[$name]), $data, $hydrators);
+            return \call_user_func($hydrators->getHandler($this->objects[$name]), $data, $hydrators);
         }
 
         $type = substr($type, 0, -2);
-        $items = array();
+        $items = [];
         foreach($data as $item) {
-            $items[] = call_user_func($hydrators->getHandler($type), $item, $hydrators);
+            $items[] = \call_user_func($hydrators->getHandler($type), $item, $hydrators);
         }
 
         return $items;

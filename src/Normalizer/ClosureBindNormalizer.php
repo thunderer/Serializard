@@ -4,7 +4,7 @@ namespace Thunder\Serializard\Normalizer;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class CallbackNormalizer
+final class ClosureBindNormalizer
 {
     private $callback;
 
@@ -15,6 +15,6 @@ final class CallbackNormalizer
 
     public function __invoke($var)
     {
-        return \call_user_func($this->callback, $var);
+        return \call_user_func(\Closure::bind($this->callback, $var, $var), $var);
     }
 }

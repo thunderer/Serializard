@@ -54,22 +54,11 @@ final class SerializardFacade
 
     public function serialize($var, $format)
     {
-        return $this->getFormat($format)->serialize($var, $this->normalizers, new ParentNormalizerContext());
+        return $this->formats->get($format)->serialize($var, $this->normalizers, new ParentNormalizerContext());
     }
 
     public function unserialize($var, $class, $format)
     {
-        return $this->getFormat($format)->unserialize($var, $class, $this->hydrators);
-    }
-
-    private function getFormat($alias)
-    {
-        $format = $this->formats->get($alias);
-
-        if(false === $format instanceof FormatInterface) {
-            throw new \RuntimeException(sprintf('No registered format for alias %s!', $alias));
-        }
-
-        return $format;
+        return $this->formats->get($format)->unserialize($var, $class, $this->hydrators);
     }
 }

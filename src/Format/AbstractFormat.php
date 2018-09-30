@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Serializard\Format;
 
+use Thunder\Serializard\Exception\SerializationFailureException;
 use Thunder\Serializard\HydratorContainer\HydratorContainerInterface as Hydrators;
 use Thunder\Serializard\NormalizerContainer\NormalizerContainerInterface as Normalizers;
 use Thunder\Serializard\NormalizerContext\NormalizerContextInterface;
@@ -10,28 +11,25 @@ use Thunder\Serializard\NormalizerContext\NormalizerContextInterface;
  */
 abstract class AbstractFormat implements FormatInterface
 {
-    protected function doSerialize($var, Normalizers $handlers, NormalizerContextInterface $context, array $state = array(), array $classes = array())
+    protected function doSerialize($var, Normalizers $handlers, NormalizerContextInterface $context, array $state = [], array $classes = [])
     {
-        if(is_object($var)) {
-            $class = get_class($var);
+        if(\is_object($var)) {
+            $class = \get_class($var);
+            // FIXME consider local handler cache to improve performance (solve parent class fallback issue)
             $handler = $handlers->getHandler($class);
 
-            if(null === $handler) {
-                throw new \RuntimeException(sprintf('No serialization handler for class %s!', $class));
-            }
-
             $hash = spl_object_hash($var);
-            $classes[] = get_class($var);
+            $classes[] = $class;
             if(isset($state[$hash])) {
-                throw new \RuntimeException('Nesting cycle: '.implode(' -> ', $classes));
+                throw SerializationFailureException::fromCycle($classes);
             }
             $state[$hash] = 1;
 
             return $this->doSerialize($handler($var, $context), $handlers, $context->withParent($var), $state, $classes);
         }
 
-        if(is_array($var)) {
-            $return = array();
+        if(\is_array($var)) {
+            $return = [];
             foreach($var as $key => $value) {
                 $return[$key] = $this->doSerialize($value, $handlers, $context, $state, $classes);
             }
@@ -46,11 +44,6 @@ abstract class AbstractFormat implements FormatInterface
 
     protected function doUnserialize($var, $class, Hydrators $hydrators)
     {
-        $handler = $hydrators->getHandler($class);
-        if(null === $handler) {
-            throw new \RuntimeException(sprintf('No unserialization handler for class %s!', $class));
-        }
-
-        return $handler($var, $hydrators);
+        return \call_user_func($hydrators->getHandler($class), $var, $hydrators);
     }
 }

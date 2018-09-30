@@ -2,6 +2,7 @@
 namespace Thunder\Serializard\Tests;
 
 use Thunder\Serializard\Normalizer\CallbackNormalizer;
+use Thunder\Serializard\Normalizer\ClosureBindNormalizer;
 use Thunder\Serializard\Normalizer\GetObjectVarsNormalizer;
 use Thunder\Serializard\Normalizer\ReflectionNormalizer;
 use Thunder\Serializard\Tests\Fake\Inheritance\FakeClass;
@@ -16,46 +17,53 @@ final class NormalizerTest extends AbstractTestCase
 {
     public function testReflectionSkip()
     {
-        $normalizer = new ReflectionNormalizer(array('tag', 'tags'));
+        $normalizer = new ReflectionNormalizer(['tag', 'tags']);
         $object = new FakeUser(12, 'XXX', new FakeTag(144, 'YYY'));
 
-        $this->assertSame(array('id' => 12, 'name' => 'XXX'), $normalizer($object));
+        $this->assertSame(['id' => 12, 'name' => 'XXX'], $normalizer($object));
     }
 
     public function testReflectionInheritance()
     {
         $normalizer = new ReflectionNormalizer();
 
-        $this->assertSame(array(
+        $this->assertSame([
             'property' => 'property',
             'parentProperty' => 'parent',
             'parentParentProperty' => 'parentParent',
-        ), $normalizer(new FakeClass('parentParent', 'parent', 'property')));
+        ], $normalizer(new FakeClass('parentParent', 'parent', 'property')));
     }
 
     public function testGetObjectVarsNormalizer()
     {
         $normalizer = new GetObjectVarsNormalizer();
 
-        $this->assertSame(array(
-            'public' => 'public',
-        ), $normalizer(new PropertyVisibility()));
+        $this->assertSame(['public' => 'public'], $normalizer(new PropertyVisibility()));
     }
 
     public function testCallbackNormalizer()
     {
         $normalizer = new CallbackNormalizer(function(PropertyVisibility $pv) {
-            return array('public' => $pv->public);
+            return ['public' => $pv->public];
         });
 
-        $this->assertSame(array(
-            'public' => 'public',
-        ), $normalizer(new PropertyVisibility()));
+        $this->assertSame(['public' => 'public'], $normalizer(new PropertyVisibility()));
     }
 
-    public function testCallbackNormalizerInvalidCallback()
+    public function testClosureBindNormalizer()
     {
-        $this->expectExceptionClass(\InvalidArgumentException::class);
-        new CallbackNormalizer('invalid');
+        $normalizer = new ClosureBindNormalizer(function() {
+            return [
+                'id' => $this->id,
+                'name' => $this->name,
+                'tag' => $this->tag,
+            ];
+        });
+
+        $this->assertEquals([
+            'id' => 1,
+            'name' => 'user',
+            'tag' => new FakeTag(2, 'tag'),
+        ], $normalizer(new FakeUser(1, 'user', new FakeTag(2, 'tag'))));
     }
 }

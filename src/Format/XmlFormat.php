@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Serializard\Format;
 
+use Thunder\Serializard\Exception\SerializationFailureException;
 use Thunder\Serializard\NormalizerContainer\NormalizerContainerInterface as Normalizers;
 use Thunder\Serializard\HydratorContainer\HydratorContainerInterface as Hydrators;
 use Thunder\Serializard\NormalizerContext\NormalizerContextInterface;
@@ -23,7 +24,7 @@ final class XmlFormat implements FormatInterface
         return $this->doSerialize($var, $normalizers, $context);
     }
 
-    private function doSerialize($var, Normalizers $normalizers, NormalizerContextInterface $context, \DOMNode $doc = null, $parent = null, $key = null, array $state = array(), array $classes = array())
+    private function doSerialize($var, Normalizers $normalizers, NormalizerContextInterface $context, \DOMNode $doc = null, $parent = null, $key = null, array $state = [], array $classes = [])
     {
         $isRoot = ($doc === null);
         $doc = $doc ?: new \DOMDocument('1.0', 'utf-8');
@@ -35,27 +36,28 @@ final class XmlFormat implements FormatInterface
         return $isRoot ? $doc->saveXML() : null;
     }
 
-    private function serializeValue($var, Normalizers $normalizers, NormalizerContextInterface $context, \DOMNode $doc, $parent, $key, array $state = array(), array $classes = array())
+    private function serializeValue($var, Normalizers $normalizers, NormalizerContextInterface $context, \DOMNode $doc, $parent, $key, array $state = [], array $classes = [])
     {
         /** @var \DOMDocument|\DOMElement $doc */
         /** @var \DOMDocument|\DOMElement $parent */
-        if(is_object($var)) {
-            $handler = $normalizers->getHandler(get_class($var));
+        if(\is_object($var)) {
+            $class = \get_class($var);
+            $handler = $normalizers->getHandler($class);
             $arr = $handler($var);
 
             $hash = spl_object_hash($var);
-            $classes[] = get_class($var);
+            $classes[] = $class;
             if(isset($state[$hash])) {
-                throw new \RuntimeException('Nesting cycle: '.implode(' -> ', $classes));
+                throw SerializationFailureException::fromCycle($classes);
             }
             $state[$hash] = 1;
 
-            $this->doSerialize($arr, $normalizers, $context->withParent($var), $doc, $parent, $this->getRoot(get_class($var)), $state, $classes);
+            $this->doSerialize($arr, $normalizers, $context->withParent($var), $doc, $parent, $this->getRoot($class), $state, $classes);
 
             return;
         }
 
-        if(is_array($var)) {
+        if(\is_array($var)) {
             $item = $key ? $doc->createElement($key) : $parent;
             foreach($var as $index => $value) {
                 $this->doSerialize($value, $normalizers, $context, $doc, $item, $index, $state, $classes);
@@ -80,10 +82,10 @@ final class XmlFormat implements FormatInterface
 
     private function parse(\DOMDocument $doc, $parent = null)
     {
-        $ret = array();
+        $ret = [];
         /** @var \DOMElement $parent */
         /** @var \DOMElement $node */
-        $tags = array();
+        $tags = [];
         foreach($parent->childNodes as $node) {
             if($node->nodeName === '#text') {
                 continue;
@@ -95,11 +97,11 @@ final class XmlFormat implements FormatInterface
             $result = $this->parse($doc, $node);
             if(array_key_exists($node->tagName, $ret)) {
                 $tags[] = $node->tagName;
-                $ret = array($ret[$node->tagName]);
+                $ret = [$ret[$node->tagName]];
                 $ret[] = $result;
                 continue;
             }
-            if(in_array($node->tagName, $tags, true)) {
+            if(\in_array($node->tagName, $tags, true)) {
                 $ret[] = $result;
                 continue;
             }
@@ -111,6 +113,6 @@ final class XmlFormat implements FormatInterface
 
     private function getRoot($class)
     {
-        return call_user_func($this->rootProvider, $class);
+        return \call_user_func($this->rootProvider, $class);
     }
 }

@@ -1,6 +1,9 @@
 <?php
 namespace Thunder\Serializard\Tests;
 
+use Thunder\Serializard\Exception\HydratorNotFoundException;
+use Thunder\Serializard\Exception\SerializationFailureException;
+use Thunder\Serializard\Exception\UnserializationFailureException;
 use Thunder\Serializard\Format\ArrayFormat;
 use Thunder\Serializard\Format\JsonFormat;
 use Thunder\Serializard\HydratorContainer\FallbackHydratorContainer;
@@ -15,21 +18,21 @@ final class FormatTest extends AbstractTestCase
     public function testArrayUnserializeInvalidTypeException()
     {
         $format = new ArrayFormat();
-        $this->expectExceptionClass(\RuntimeException::class);
-        $format->unserialize(new \stdClass(), 'stdClass', new FallbackHydratorContainer());
+        $this->expectExceptionClass(UnserializationFailureException::class);
+        $format->unserialize(new \stdClass(), \stdClass::class, new FallbackHydratorContainer());
     }
 
     public function testMissingUnserializationHandlerException()
     {
         $format = new ArrayFormat();
-        $this->expectExceptionClass(\RuntimeException::class);
-        $format->unserialize(array(), 'stdClass', new FallbackHydratorContainer());
+        $this->expectExceptionClass(HydratorNotFoundException::class);
+        $format->unserialize([], \stdClass::class, new FallbackHydratorContainer());
     }
 
     public function testJsonEncodeSerializationFailureException()
     {
         $format = new JsonFormat();
-        $this->expectExceptionClass(\RuntimeException::class); // Inf and NaN cannot be JSON encoded
+        $this->expectExceptionClass(SerializationFailureException::class); // Inf and NaN cannot be JSON encoded
         $format->serialize(INF, new FallbackNormalizerContainer(), new FakeNormalizerContext()); // INF is returned as zero on PHP <=5.4
     }
 }

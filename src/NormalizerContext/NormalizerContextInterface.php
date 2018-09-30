@@ -15,7 +15,7 @@ interface NormalizerContextInterface
     /**
      * Returns root object passed to serialize() method.
      *
-     * @return
+     * @return object
      */
     public function getRoot();
 
@@ -31,7 +31,7 @@ interface NormalizerContextInterface
     /**
      * Returns the format used to serialize given object.
      *
-     * @return
+     * @return string
      */
     public function getFormat();
 
@@ -47,7 +47,7 @@ interface NormalizerContextInterface
     /**
      * Returns parent of currently normalized object or null for root level.
      *
-     * @return
+     * @return object|null
      */
     public function getParent();
 }

@@ -1,7 +1,18 @@
 <?php
 namespace Thunder\Serializard\Tests;
 
+use Thunder\Serializard\Exception\ClassNotFoundException;
+use Thunder\Serializard\Exception\NormalizerConflictException;
+use Thunder\Serializard\Exception\NormalizerNotFoundException;
 use Thunder\Serializard\NormalizerContainer\FallbackNormalizerContainer;
+use Thunder\Serializard\Tests\Fake\FakeUser;
+use Thunder\Serializard\Tests\Fake\FakeUserParent;
+use Thunder\Serializard\Tests\Fake\FakeUserParentParent;
+use Thunder\Serializard\Tests\Fake\Interfaces\AnotherTypeInterface;
+use Thunder\Serializard\Tests\Fake\Interfaces\TypeA;
+use Thunder\Serializard\Tests\Fake\Interfaces\TypeB;
+use Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface;
+use Thunder\Serializard\Tests\Fake\Interfaces\TypeMultiple;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -11,70 +22,77 @@ final class NormalizerContainerTest extends AbstractTestCase
     public function testAlias()
     {
         $normalizers = new FallbackNormalizerContainer();
-        $normalizers->add('stdClass', function() { return 'value'; });
-        $normalizers->addAlias('DateTime', 'stdClass');
+        $normalizers->add(\stdClass::class, function() { return 'value'; });
+        $normalizers->addAlias(\DateTime::class, \stdClass::class);
 
-        $this->assertSame('value', call_user_func($normalizers->getHandler('stdClass')));
-        $this->assertSame('value', call_user_func($normalizers->getHandler('DateTime')));
+        $this->assertSame('value', call_user_func($normalizers->getHandler(\stdClass::class)));
+        $this->assertSame('value', call_user_func($normalizers->getHandler(\DateTime::class)));
     }
 
     public function testInterface()
     {
         $normalizers = new FallbackNormalizerContainer();
-        $interfaceName = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface';
-        $interfaceTypeA = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeA';
-        $interfaceTypeB = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeB';
-        $normalizers->add($interfaceName, function() { return 'type'; });
+        $normalizers->add(TypeInterface::class, function() { return 'type'; });
 
-        $this->assertSame('type', call_user_func($normalizers->getHandler($interfaceTypeA)));
-        $this->assertSame('type', call_user_func($normalizers->getHandler($interfaceTypeB)));
+        $this->assertSame('type', call_user_func($normalizers->getHandler(TypeA::class)));
+        $this->assertSame('type', call_user_func($normalizers->getHandler(TypeB::class)));
     }
 
     public function testInheritance()
     {
         $normalizers = new FallbackNormalizerContainer();
-        $ancestorName = 'Thunder\Serializard\Tests\Fake\FakeUserParentParent';
-        $parentName = 'Thunder\Serializard\Tests\Fake\FakeUserParent';
-        $userName = 'Thunder\Serializard\Tests\Fake\FakeUser';
-        $normalizers->add($ancestorName, function() { return 'ancestor'; });
+        $normalizers->add(FakeUserParentParent::class, function() { return 'ancestor'; });
 
-        $this->assertSame('ancestor', call_user_func($normalizers->getHandler($ancestorName)));
-        $this->assertSame('ancestor', call_user_func($normalizers->getHandler($parentName)));
-        $this->assertSame('ancestor', call_user_func($normalizers->getHandler($userName)));
+        $this->assertSame('ancestor', call_user_func($normalizers->getHandler(FakeUserParentParent::class)));
+        $this->assertSame('ancestor', call_user_func($normalizers->getHandler(FakeUserParent::class)));
+        $this->assertSame('ancestor', call_user_func($normalizers->getHandler(FakeUser::class)));
     }
 
     public function testMultipleInterfacesException()
     {
-        $typeInterface = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeInterface';
-        $typeAnother = 'Thunder\Serializard\Tests\Fake\Interfaces\AnotherTypeInterface';
-        $typeMultiple = 'Thunder\Serializard\Tests\Fake\Interfaces\TypeMultiple';
-
         $normalizers = new FallbackNormalizerContainer();
-        $normalizers->add($typeInterface, function() { return 'multiple'; });
-        $normalizers->add($typeAnother, function() { return 'multiple'; });
+        $normalizers->add(TypeInterface::class, function() { return 'multiple'; });
+        $normalizers->add(AnotherTypeInterface::class, function() { return 'multiple'; });
 
-        $this->expectExceptionClass(\RuntimeException::class);
-        $normalizers->getHandler($typeMultiple);
+        $this->expectExceptionClass(NormalizerConflictException::class);
+        $normalizers->getHandler(TypeMultiple::class);
+    }
+
+    public function testNoDefaultHandler()
+    {
+        $normalizers = new FallbackNormalizerContainer();
+        $this->assertFalse($normalizers->hasDefault());
+        $this->assertNull($normalizers->getDefault());
+
+        $handler = function() {};
+        $normalizers->setDefault($handler);
+        $this->assertTrue($normalizers->hasDefault());
+        $this->assertSame($handler, $normalizers->getDefault());
+    }
+
+    public function testDefaultHandlerFallback()
+    {
+        $direct = function() {};
+        $fallback = function() {};
+        $normalizers = new FallbackNormalizerContainer();
+        $normalizers->add(\DateTime::class, $direct);
+        $normalizers->setDefault($fallback);
+
+        $this->assertSame($direct, $normalizers->getHandler(\DateTime::class));
+        $this->assertSame($fallback, $normalizers->getHandler(\DateTimeImmutable::class));
     }
 
     public function testInvalidClassOrInterfaceName()
     {
         $normalizers = new FallbackNormalizerContainer();
-        $this->expectExceptionClass(\RuntimeException::class);
+        $this->expectExceptionClass(ClassNotFoundException::class);
         $normalizers->add('invalid', function() {});
     }
 
     public function testAliasForInvalidClass()
     {
         $normalizers = new FallbackNormalizerContainer();
-        $this->expectExceptionClass(\RuntimeException::class);
+        $this->expectExceptionClass(NormalizerNotFoundException::class);
         $normalizers->addAlias(\stdClass::class, \DateTime::class);
-    }
-
-    public function testInvalidHandler()
-    {
-        $normalizers = new FallbackNormalizerContainer();
-        $this->expectExceptionClass(\RuntimeException::class);
-        $normalizers->add(\stdClass::class, 'invalid');
     }
 }

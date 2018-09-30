@@ -19,5 +19,9 @@
             "Thunder\\Serializard\\": "src/",
             "Thunder\\Serializard\\Tests\\": "tests/"
         }
+    },
+    "suggest": {
+        "symfony/yaml": "required for YAML format",
+        "ext-dom": "required for XML format"
     }
 }

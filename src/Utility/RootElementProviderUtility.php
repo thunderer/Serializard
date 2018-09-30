@@ -8,11 +8,11 @@ final class RootElementProviderUtility
     public function __construct(array $aliases)
     {
         foreach($aliases as $key => $alias) {
-            if(false === is_string($key)) {
-                throw new \InvalidArgumentException('Invalid alias class name, string required!');
+            if(false === \is_string($key)) {
+                throw new \InvalidArgumentException('Invalid alias class name, string required.');
             }
-            if(false === is_string($alias)) {
-                throw new \InvalidArgumentException(sprintf('Invalid alias for class %s, string required!', $key));
+            if(false === \is_string($alias)) {
+                throw new \InvalidArgumentException(sprintf('Invalid alias for class %s, string required.', $key));
             }
         }
 
@@ -22,7 +22,7 @@ final class RootElementProviderUtility
     public function __invoke($class)
     {
         if(false === array_key_exists($class, $this->aliases)) {
-            throw new \RuntimeException(sprintf('No root element alias for class %s!', $class));
+            throw new \RuntimeException(sprintf('Root element alias for class %s not found.', $class));
         }
 
         return $this->aliases[$class];
