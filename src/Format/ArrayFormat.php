@@ -13,6 +13,8 @@ final class ArrayFormat extends AbstractFormat
 {
     public function serialize($var, Normalizers $normalizers, NormalizerContextInterface $context)
     {
+        $this->normalizers = [];
+
         return $this->doSerialize($var, $normalizers, $context);
     }
 

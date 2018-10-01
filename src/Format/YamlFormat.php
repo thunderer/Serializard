@@ -13,6 +13,8 @@ final class YamlFormat extends AbstractFormat
 {
     public function serialize($var, Normalizers $normalizers, NormalizerContextInterface $context)
     {
+        $this->normalizers = [];
+
         return Yaml::dump($this->doSerialize($var, $normalizers, $context), 2, 2);
     }
 

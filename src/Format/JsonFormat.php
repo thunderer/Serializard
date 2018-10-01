@@ -13,6 +13,8 @@ final class JsonFormat extends AbstractFormat
 {
     public function serialize($var, Normalizers $normalizers, NormalizerContextInterface $context)
     {
+        $this->normalizers = [];
+
         $json = @json_encode($this->doSerialize($var, $normalizers, $context));
 
         if(json_last_error() !== JSON_ERROR_NONE) {

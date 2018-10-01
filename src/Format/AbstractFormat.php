@@ -11,12 +11,16 @@ use Thunder\Serializard\NormalizerContext\NormalizerContextInterface;
  */
 abstract class AbstractFormat implements FormatInterface
 {
+    protected $normalizers = [];
+
     protected function doSerialize($var, Normalizers $handlers, NormalizerContextInterface $context, array $state = [], array $classes = [])
     {
         if(\is_object($var)) {
             $class = \get_class($var);
-            // FIXME consider local handler cache to improve performance (solve parent class fallback issue)
-            $handler = $handlers->getHandler($class);
+            if(false === isset($this->normalizers[$class])) {
+                $this->normalizers[$class] = $handlers->getHandler($class);
+            }
+            $handler = $this->normalizers[$class];
 
             $hash = spl_object_hash($var);
             $classes[] = $class;
@@ -44,6 +48,16 @@ abstract class AbstractFormat implements FormatInterface
 
     protected function doUnserialize($var, $class, Hydrators $hydrators)
     {
+        if($class[-2].$class[-1] === '[]') {
+            $objects = [];
+            $class = substr($class, 0, -2);
+            foreach($var as $key => $value) {
+                $objects[$key] = \call_user_func($hydrators->getHandler($class), $value, $hydrators);
+            }
+
+            return $objects;
+        }
+
         return \call_user_func($hydrators->getHandler($class), $var, $hydrators);
     }
 }

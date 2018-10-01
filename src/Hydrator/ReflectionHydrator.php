@@ -43,6 +43,9 @@ final class ReflectionHydrator
         if(false === array_key_exists($name, $this->objects)) {
             return $data;
         }
+        if(null === $data) {
+            return null;
+        }
 
         $type = $this->objects[$name];
         if('[]' !== substr($type, -2)) {
